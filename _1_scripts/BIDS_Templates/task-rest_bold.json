@@ -1,0 +1,19 @@
+{
+    "EchoTime": 0.03,
+    "RepetitionTime": 0.95,
+    "FlipAngle": 60,
+    "TaskName": "rest",
+    "TaskDescription": "subjects were asked to keep eyes open and fixated on target, relax and try not to think about anything in particular",
+    "Modality": "MR",
+    "MagneticFieldStrength": 3,
+    "ImagingFrequency": 127.698,
+    "Manufacturer": "GE",
+    "InternalPulseSequenceName": "EPI2",
+    "ManufacturersModelName": "DISCOVERY MR750",
+    "InstitutionName": "NSHA - Central Zone",
+    "DeviceSerialNumber": "0000000902473MR2",
+    "StationName": "HIMR2",
+    "BodyPartExamined": "HEAD",
+    "PatientPosition": "HFS",
+    "ProcedureStepDescription": "FORBOW"
+}

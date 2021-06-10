@@ -1,0 +1,98 @@
+
+## fmriprep commands 
+cd ~/work/uher/FORBOW/rawdata/FORBOW_BIDS
+fmriprep-docker --fs-license-file $HOME/apps/freesurfer/license.txt $(pwd) $(pwd)/derivatives participant
+open ./derivatives/fmriprep/sub-005.html
+
+
+
+### 2020/12/22-1915, Carl, from Neptune:
+cd /shared/work/FORBOW/rawdata/FORBOW_BIDS/
+sudo docker pull nipreps/fmriprep:20.2.1
+fmriprep-docker --fs-license-file $FREESURFER_HOME/license.txt $(pwd) $(pwd)/derivatives participant --participant_list 003 005 --no-sub
+
+## Trying to use Singularity version of fmriprep on Neptune:
+cd ~/
+mkdir -p ~/singularity_images
+singularity build ~/singularity_images/fmriprep-20.2.1.simg docker://nipreps/fmriprep:20.2.1
+cd /shared/work/FORBOW/rawdata/FORBOW_BIDS/
+singularity run --cleanenv ~/singularity_images/fmriprep-20.2.1.simg -h $(pwd) $(pwd)/derivatives participant --participant_label 005 --nthreads 16 --omp-nthreads 16
+*** ERROR from minicondonda failing to import DueCredit...
+
+unset PYTHONPATH; singularity run --cleanenv ~/singularity_images/fmriprep-20.2.1.simg -h $(pwd) $(pwd)/derivatives participant --participant_label 005 --nthreads 16 --omp-nthreads 16 -w $(pwd)/work
+*** ERROR from minicondonda failing to import DueCredit...
+
+export SINGULARITYENV_FS_LICENSE=$FREESURFER_HOME/license.txt
+unset PYTHONPATH; singularity exec --cleanenv ~/singularity_images/fmriprep-20.2.1.simg env | grep FS_LICENSE
+*** ERROR from minicondonda failing to import DueCredit...
+
+
+export PYTHONNOUSERSITE=1;  singularity run --cleanenv -H ~/singularity_images/fmriprep-20.2.1.simg -h $(pwd) $(pwd)/derivatives participant --participant_label 005 --nthreads 16 --omp-nthreads 16 -w $(pwd)/work
+*** ERROR from minicondonda failing to import DueCredit...
+
+
+export PYTHONNOUSERSITE=1; unset PYTHONPATH; singularity run --cleanenv ~/singularity_images/fmriprep-20.2.1.simg $(pwd) $(pwd)/derivatives participant --participant_label 005 --nthreads 16 --omp-nthreads 16 -w $(pwd)/work
+
+
+
+
+## 2020/12/22 --> install latest version of singularity
+## from https://sylabs.io/guides/3.5/user-guide/quick_start.html#quick-installation-steps
+mkdir -p ~/code && cd ~/code/
+export VERSION=1.15.6 OS=linux ARCH=amd64 && wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz 
+sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz
+echo 'export PATH=/usr/local/go/bin:$PATH' >> ~/.bashrc && source ~/.bashrc
+
+export VERSION=3.7.0 && wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz && tar -xzf singularity-${VERSION}.tar.gz && cd singularity
+./mconfig && make -C builddir && sudo make -C builddir install
+
+## create fmriprep image:
+mkdir -p ~/singularity_images
+singularity build ~/singularity_images/fmriprep-20.2.1.simg docker://nipreps/fmriprep:20.2.1
+
+unset PYTHONPATH; singularity run --cleanenv ~/singularity_images/fmriprep-20.2.1.simg $(pwd) $(pwd)/derivatives participant --participant_label 005 --nthreads 16 --omp-nthreads 16 -w $(pwd)/work
+
+#### ERRORS ####################################################################################################################
+singularity run --cleanenv ~/singularity_images/fmriprep-20.2.1.simg -B $(pwd):/data -B $(pwd)/derivatives:/out -B $(pwd)/derivatives/work:/work participant --participant_label 005 --nthreads 16 --omp-nthreads 16
+
+warnings.warn("The ability to pass arguments to BIDSLayout that control "
+usage: fmriprep [-h] [--version] [--skip_bids_validation]
+                [--participant-label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
+                [-t TASK_ID] [--echo-idx ECHO_IDX] [--bids-filter-file FILE]
+                [--anat-derivatives PATH] [--bids-database-dir PATH]
+                [--nprocs NPROCS] [--omp-nthreads OMP_NTHREADS]
+                [--mem MEMORY_GB] [--low-mem] [--use-plugin FILE]
+                [--anat-only] [--boilerplate_only] [--md-only-boilerplate]
+                [--error-on-aroma-warnings] [-v]
+                [--ignore {fieldmaps,slicetiming,sbref,t2w,flair} [{fieldmaps,slicetiming,sbref,t2w,flair} ...]]
+                [--longitudinal]
+                [--output-spaces [OUTPUT_SPACES [OUTPUT_SPACES ...]]]
+                [--bold2t1w-init {register,header}] [--bold2t1w-dof {6,9,12}]
+                [--force-bbr] [--force-no-bbr] [--medial-surface-nan]
+                [--dummy-scans DUMMY_SCANS] [--random-seed _RANDOM_SEED]
+                [--use-aroma]
+                [--aroma-melodic-dimensionality AROMA_MELODIC_DIM]
+                [--return-all-components]
+                [--fd-spike-threshold REGRESSORS_FD_TH]
+                [--dvars-spike-threshold REGRESSORS_DVARS_TH]
+                [--skull-strip-template SKULL_STRIP_TEMPLATE]
+                [--skull-strip-fixed-seed]
+                [--skull-strip-t1w {auto,skip,force}] [--fmap-bspline]
+                [--fmap-no-demean] [--use-syn-sdc] [--force-syn]
+                [--fs-license-file FILE] [--fs-subjects-dir PATH]
+                [--no-submm-recon] [--cifti-output [{91k,170k}] |
+                --fs-no-reconall] [--output-layout {bids,legacy}]
+                [-w WORK_DIR] [--clean-workdir] [--resource-monitor]
+                [--reports-only] [--config-file FILE] [--write-graph]
+                [--stop-on-first-crash] [--notrack]
+                [--debug {compcor,all} [{compcor,all} ...]] [--sloppy]
+                bids_dir output_dir {participant}
+fmriprep: error: Path does not exist: </shared/uher/FORBOW/rawdata/FORBOW_BIDS:/data>.
+
+
+unset PYTHONPATH; singularity run --cleanenv ~/singularity_images/fmriprep-20.2.1.simg -B $(pwd):/data -B $(pwd)/derivatives:/out participant --participant_label 005 --nthreads 16 --omp-nthreads 16 -w $(pwd)/work:/work
+
+
+
+
+

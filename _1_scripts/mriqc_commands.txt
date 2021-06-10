@@ -1,0 +1,3 @@
+# mriqc commands
+cd ~/work/uher/FORBOW/rawdata/FORBOW_BIDS
+docker run -it --rm -v $(pwd)/FORBOW_BIDS:/data:ro -v $(pwd)/FORBOW_MRIQC:/out poldracklab/mriqc:latest /data /out participant --participant_label 005 --no-sub
