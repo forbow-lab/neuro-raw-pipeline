@@ -1,0 +1,540 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>EpiScanArchiveRecon</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-05-17"><meta name="DC.source" content="EpiScanArchiveRecon.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">EpiScanArchiveRecon - Reconstruct data from an EPI scan archive</a></li><li><a href="#3">Load the given Epi ScanArchive</a></li><li><a href="#4">Load rowflip.param</a></li><li><a href="#5">Load reference data</a></li><li><a href="#6">Load vrgf.dat</a></li><li><a href="#7">Load ASSET Calibration (if it exists)</a></li><li><a href="#8">Parameter and variable initialization</a></li><li><a href="#9">Loop and Recon</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [ ] = EpiScanArchiveRecon( epiScanArchiveFilePath )
+</pre><h2>EpiScanArchiveRecon - Reconstruct data from an EPI scan archive<a name="2"></a></h2><p>Copyright 2017 General Electric Company. All rights reserved. GE Proprietary and Confidential Information. Only to be distributed with permission from GE. Resulting outputs are not for diagnostic purposes.</p><pre class="language-matlab">EpiScanArchiveRecon(epiScanArchiveFilePath)
+will <span class="string">reconstruct</span> <span class="string">the</span> <span class="string">single-shot</span> <span class="string">EPI</span> <span class="string">data</span> <span class="string">in</span> <span class="string">the</span> <span class="string">given</span> <span class="string">scan</span> <span class="string">archive.</span>
+All <span class="string">secondary</span> <span class="string">input</span> <span class="string">files</span> <span class="string">are</span> <span class="string">obtained</span> <span class="string">from</span> <span class="string">the</span> <span class="string">files</span> <span class="string">contained</span> <span class="string">in</span> <span class="string">the</span>
+scan <span class="string">archive</span> <span class="string">itself.</span> <span class="string">These</span> <span class="string">secondary</span> <span class="string">input</span> <span class="string">files</span> <span class="string">are</span> <span class="string">extracted</span> <span class="string">from</span> <span class="string">the</span>
+scan <span class="string">archive</span> <span class="string">when</span> <span class="string">it</span> <span class="string">is</span> <span class="string">loaded.</span>
+This <span class="string">script</span> <span class="string">currently</span> <span class="string">supports</span> <span class="string">a</span> <span class="string">basic</span> <span class="string">single-shot</span> <span class="string">EPI</span> <span class="string">reconstruction</span>
+with <span class="string">the</span> <span class="string">following</span> <span class="string">steps/algorithms:</span>
+    1. Extract <span class="string">Raw</span> <span class="string">Data</span>
+    2. Row <span class="string">flip</span> <span class="string">based</span> <span class="string">on</span> <span class="string">rowflip.param</span> <span class="string">file</span> <span class="string">in</span> <span class="string">scan</span> <span class="string">archive</span>
+    3. Static <span class="string">EPI</span> <span class="string">Phase</span> <span class="string">Correction</span> <span class="string">(based on either the ref.h5 file in the</span>
+       scan <span class="string">archive</span> <span class="string">or</span> <span class="string">the</span> <span class="string">coefficients</span> <span class="string">computed</span> <span class="string">from</span> <span class="string">an</span> <span class="string">integrated</span>
+       reference <span class="string">pass</span> <span class="string">of</span> <span class="string">a</span> <span class="string">diffusion</span> <span class="string">acquisition)</span>
+    4. Ramp <span class="string">sampling</span> <span class="string">based</span> <span class="string">on</span> <span class="string">vrgf.dat</span> <span class="string">in</span> <span class="string">scan</span> <span class="string">archive</span>
+    5. 2D Transform
+    6. Channel <span class="string">Combination</span> <span class="string">(Sum of Squares or ASSET)</span>
+    7. Gradwarp
+    8. DICOM <span class="string">Generation</span>
+</pre><pre class="language-matlab">Support <span class="string">for</span> <span class="string">other</span> <span class="string">EPI</span> <span class="string">specific</span> <span class="string">reconstruction</span> <span class="string">steps</span> <span class="string">(such as</span>
+magnitude <span class="string">or</span> <span class="string">complex</span> <span class="string">averaging</span>, realtime <span class="string">field</span> <span class="string">adjustment</span>, etc<span class="keyword">...</span><span class="comment">) may</span>
+be added <span class="string">by</span> <span class="string">following</span> <span class="string">the</span> <span class="string">examples</span> <span class="string">in</span> <span class="string">the</span> <span class="string">existing</span> <span class="string">Epi</span> <span class="string">pfile</span> <span class="string">based</span>
+rehearsal <span class="string">recon</span> <span class="string">scripts</span>
+</pre><h2>Load the given Epi ScanArchive<a name="3"></a></h2><p>Load the given scan archive and extract all secondary input files</p><pre class="codeinput">    [archiveFilePath archiveFileName archiveFileExt] = fileparts(epiScanArchiveFilePath);
+    archive = GERecon(<span class="string">'Archive.Load'</span>, epiScanArchiveFilePath);
+</pre><h2>Load rowflip.param<a name="4"></a></h2><p>rowflip.param is used to control which EPI readouts are flipped along the readout axis. For a single shot scan, this would be every other readout.</p><pre class="codeinput">    rowFlipHandle = GERecon(<span class="string">'Epi.LoadRowFlip'</span>, <span class="string">'rowflip.param'</span>);
+</pre><h2>Load reference data<a name="5"></a></h2><p>Based on the download data in the archive, determine if this scan has an integrated reference scan or if the reference coefficients should be loaded from the ref.h5 file on disk.</p><pre class="codeinput">    isIntegratedStaticPC = archive.DownloadData.rdb_hdr_rec.rdb_hdr_ref == 5;
+    isIntegratedRefBitSet = bitget(archive.DownloadData.rdb_hdr_rec.rdb_hdr_pcctrl, 5);
+    isIntegratedRef = isIntegratedStaticPC || isIntegratedRefBitSet;
+    firstImageAcquisitionPhase = 0;
+    firstImageDabPacketIndex = 1;
+    <span class="keyword">if</span>(isIntegratedRef)
+        [phaseCorrectionHandle, nextDabPacketIndex] = EpiReferenceScanRecon(archive, rowFlipHandle);
+        firstImageDabPacketIndex = nextDabPacketIndex;
+        firstImageAcquisitionPhase = 1;
+    <span class="keyword">else</span>
+        <span class="comment">% Read phase correction coefficients from ref.h5</span>
+        phaseCorrectionHandle = GERecon(<span class="string">'Epi.LoadReference'</span>, <span class="string">'ref.h5'</span>);
+    <span class="keyword">end</span>
+</pre><h2>Load vrgf.dat<a name="6"></a></h2><p>Look in the scan archive directory for a vrgf.dat file. Certain fMRI scans may use an alternative vrgf_kernels.dat file. Support may be added for vrgf_kernels.dat by following the example in EpiMultiPhaseRecon.m</p><pre class="codeinput">    vrgfHandle = GERecon(<span class="string">'RampSampling.Load'</span>, <span class="string">'vrgf.dat'</span>);
+    kernelMatrix = GERecon(<span class="string">'RampSampling.KernelMatrix'</span>, vrgfHandle);
+    figure;
+    subplot(2,1,1);
+    imagesc(kernelMatrix);colormap(gray);colorbar;axis <span class="string">off</span>;title(<span class="string">'VRGF Interpolation Kernel Matrix'</span>);
+    subplot(2,1,2);
+    numRows = size(kernelMatrix, 1);
+    plot(kernelMatrix(numRows/4, :));title([<span class="string">'Sinc Interpolation Kernel for Interpolated Point: '</span> num2str(numRows/4) <span class="string">' of '</span> num2str(numRows)]);
+</pre><img vspace="5" hspace="5" src="EpiScanArchiveRecon_01.png" alt=""> <h2>Load ASSET Calibration (if it exists)<a name="7"></a></h2><p>Check the exam data path for any ASSET calibration files that were included in the archive. If an ASSET calibration file is included in the archive then load the calibration here.</p><pre class="codeinput">    examDataDirectory = num2str(archive.DownloadData.rdb_hdr_exam.ex_no);
+    useAsset = 0;
+    <span class="keyword">if</span>(exist(num2str(archive.DownloadData.rdb_hdr_exam.ex_no), <span class="string">'dir'</span>))
+       <span class="comment">% If the exam data directory exists, check if it contains an ASSET calibration file</span>
+       fileList = dir(examDataDirectory);
+       <span class="keyword">for</span> i=1:size(fileList,1)
+          findResult = strfind(fileList(i).name, <span class="string">'Asset'</span>);
+          <span class="keyword">if</span>(size(findResult) &gt; 0)
+             assetCalibrationFile = fullfile(num2str(archive.DownloadData.rdb_hdr_exam.ex_no), fileList(i).name);
+             disp([<span class="string">'Loading Calibration File: '</span> assetCalibrationFile]);
+             useAsset = 1;
+             GERecon(<span class="string">'Asset.LoadCalibration'</span>, assetCalibrationFile);
+          <span class="keyword">end</span>
+       <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><pre class="codeoutput">Loading Calibration File: 6871\Asset-Coil211901-Repetition0000.h5
+</pre><h2>Parameter and variable initialization<a name="8"></a></h2><p>Extract information from the archive's DownloadData object to set parameters used in this reconstruction. The refViewsTop and refViewsBottom variables are used to discard readouts acquired for dynamic phase correction. The dynamic phase correction algorithm is not currently supported by this script.</p><pre class="codeinput">    refViewsTop = archive.DownloadData.rdb_hdr_rec.rdb_hdr_extra_frames_top;
+    refViewsBottom = archive.DownloadData.rdb_hdr_rec.rdb_hdr_extra_frames_bot;
+    imageSize = archive.DownloadData.rdb_hdr_rec.rdb_hdr_im_size;
+    <span class="comment">% Determine if the phase encoding direction was reversed for this scan.</span>
+    <span class="comment">% Reverse phase encoding direction is supported for DW-EPI scans or</span>
+    <span class="comment">% other single-echo EPI scans. When reverse phase encoding is used, the</span>
+    <span class="comment">% image must be reversed along the phase-encoding direction after the</span>
+    <span class="comment">% 2D transform.</span>
+    isDiffusion = bitget(archive.DownloadData.rdb_hdr_rec.rdb_hdr_data_collect_type1, 22);
+    numEchoes = archive.DownloadData.rdb_hdr_rec.rdb_hdr_nechoes;
+    flipBitsSet = bitget(archive.DownloadData.rdb_hdr_rec.rdb_hdr_dacq_ctrl,2) || bitget(archive.DownloadData.rdb_hdr_rec.rdb_hdr_dacq_ctrl,3);
+    alternatePhaseEncodingDirection = (flipBitsSet &amp;&amp; isDiffusion) || (flipBitsSet &amp;&amp; numEchoes == 1);
+</pre><h2>Loop and Recon<a name="9"></a></h2><p>Loop over all control packets in this scan archive. Each control packet corresponds to either an Epi Readout (opcode 6 or 14) or an end of pass/end of scan(opcode 0). PassDone and ScanDone control packets do not have data associated with them; thus, only data associated with opcode 6 (HyperScanOpcode) or 14 (DiffusionHyperScanOpcode) is reconstructed. If this scan contained an integrated reference pass, the EpiReferenceScanRecon script already processed some control packets and returned the next control packet to process. Thus, the loop starts from the [firstImageDabPacketIndex] variable and continues until all control packets are processed.</p><pre class="codeinput">    numAcquisitionsPerRepetition = archive.DownloadData.rdb_hdr_rec.rdb_hdr_npasses / archive.DownloadData.rdb_hdr_rec.rdb_hdr_reps;
+    acquisitionPassCounter = 0;
+    phaseIndex = firstImageAcquisitionPhase;
+    imageNumber = 0;
+    figure;
+    <span class="keyword">for</span> dabPacketIndex = firstImageDabPacketIndex:archive.ControlCount
+        <span class="comment">% Extract the next control packet and associated data from the scan</span>
+        <span class="comment">% archive. Inspect the opcode in the control packet to determine if</span>
+        <span class="comment">% the packet contains data to reconstruct.</span>
+        currentControl = GERecon(<span class="string">'Archive.Next'</span>, archive);
+        reconstructDataForThisPacket = 0;
+        <span class="keyword">if</span>(currentControl.opcode == 0)
+            reconstructDataForThisPacket = 0;
+            <span class="comment">% For diffusion scans, the same volume may be acquired multiple times for the various diffusion passes (T2, B-Value/Diffusion Direction).</span>
+            <span class="comment">% Thus, when this counter reaches the number of acquisitions per repetition, reset the counter back to 0.</span>
+            acquisitionPassCounter = acquisitionPassCounter + 1;
+            <span class="keyword">if</span>(acquisitionPassCounter == numAcquisitionsPerRepetition)
+                acquisitionPassCounter = 0;
+                phaseIndex = phaseIndex + 1;
+            <span class="keyword">end</span>
+        <span class="keyword">elseif</span>(currentControl.opcode == 6)
+            reconstructDataForThisPacket = 1;
+        <span class="keyword">elseif</span>(currentControl.opcode == 14)
+            reconstructDataForThisPacket = 1;
+        <span class="keyword">end</span>
+
+        <span class="keyword">if</span>(reconstructDataForThisPacket)
+            <span class="comment">% Obtain slice information for the slice we're about to reconstruct</span>
+            acquisitionPassCounterOneBased = acquisitionPassCounter + 1;
+            oneBasedPassSliceNum = currentControl.sliceNum + 1;
+            sliceInfo = GERecon(<span class="string">'Archive.Info'</span>, archive, acquisitionPassCounterOneBased, oneBasedPassSliceNum);
+            geometricSliceNumber = sliceInfo.Number;
+
+            <span class="comment">% Extract raw image kSpace. Additional reference views used</span>
+            <span class="comment">% with dynamic phase correction are not supported in this</span>
+            <span class="comment">% rehearsal recon; thus, they are discarded here. Also, handle</span>
+            <span class="comment">% the bottom up case in which view-increment is negative prior</span>
+            <span class="comment">% to any other processing.</span>
+            kSpace = currentControl.Data;
+
+            <span class="keyword">if</span>(currentControl.viewSkip &lt; 0)
+                <span class="comment">% This is a bottom up EPI scan. Thus, the kSpace must be</span>
+                <span class="comment">% flipped along the phase encoding direction prior to</span>
+                <span class="comment">% processing. This is because the raw data is held in</span>
+                <span class="comment">% acquisition time order. Since the views are acquired</span>
+                <span class="comment">% bottom-up. The first view in the raw data matrix should</span>
+                <span class="comment">% actually be the last view of the kSpace matrix.</span>
+                kSpace = flip(kSpace,3);
+            <span class="keyword">end</span>
+
+            kSpaceTotalNumViews = size(kSpace,3);
+            kSpaceWithoutRefViews = kSpace(:,:,(refViewsTop+1):(kSpaceTotalNumViews-refViewsBottom));
+
+            <span class="comment">% Reconstruct each channel</span>
+            numChannels = size(kSpace,2);
+            channelImages = single(zeros(imageSize, imageSize, numChannels));
+            <span class="keyword">for</span> channel=1:numChannels
+                <span class="comment">% Apply rowflip</span>
+                rowFlippedKSpace = GERecon(<span class="string">'Epi.ApplyImageRowFlip'</span>, rowFlipHandle, squeeze(kSpaceWithoutRefViews(:,channel,:)));
+
+                <span class="comment">% Apply phase correction</span>
+                phaseCorrectedKSpace = GERecon(<span class="string">'Epi.ApplyPhaseCorrection'</span>, phaseCorrectionHandle, rowFlippedKSpace, geometricSliceNumber, channel);
+
+                <span class="comment">% Interpolate ramp sampled data</span>
+                interpolatedData = GERecon(<span class="string">'RampSampling.Interpolate'</span>, vrgfHandle, phaseCorrectedKSpace);
+
+                <span class="comment">% Filter, 2D-IFFT</span>
+                image = GERecon(<span class="string">'Transform'</span>, interpolatedData);
+
+                <span class="comment">% If ASSET and Homodyne are both enabled for this scan then</span>
+                <span class="comment">% ASSET is run on both the high pass filtered and low pass</span>
+                <span class="comment">% filtered images generated by the Homodyne algorithm. To</span>
+                <span class="comment">% enable this use case, the Transform command returns the high</span>
+                <span class="comment">% pass filtered and low pass filtered images in indices one and</span>
+                <span class="comment">% two of the third dimension of the return image. For this</span>
+                <span class="comment">% case, the channel images array must have space to store the</span>
+                <span class="comment">% additional high pass filtered / low pass filtered images.</span>
+                <span class="comment">% Resize the channelImages matrix here to enable this use case.</span>
+                <span class="comment">% Note that this resize happens only once, the first time</span>
+                <span class="comment">% through this loop.</span>
+                <span class="keyword">if</span>( (size(image,3) &gt; 1) &amp;&amp; (size(channelImages,4) == 1) )
+                    channelImages = single(zeros(size(channelImages,1), size(channelImages,2), size(channelImages,3), 2));
+                <span class="keyword">end</span>
+
+                channelImages(:,:,channel, :) = image;
+            <span class="keyword">end</span>
+
+            <span class="comment">% As described above, if a reverse phase encoding direction was</span>
+            <span class="comment">% used for this scan, the data must be flipped along the phase</span>
+            <span class="comment">% encoding direction after the 2D transform. This processing is</span>
+            <span class="comment">% done here.</span>
+            <span class="keyword">if</span>(alternatePhaseEncodingDirection)
+                channelImages = fliplr(channelImages);
+            <span class="keyword">end</span>
+
+            <span class="comment">% Channel combine processing - either Sum of Squares or ASSET</span>
+            <span class="keyword">if</span>(useAsset)
+                channelCombinedImage = GERecon(<span class="string">'Asset.Unalias'</span>, channelImages, sliceInfo.Corners);
+            <span class="keyword">else</span>
+                channelCombinedImage = GERecon(<span class="string">'SumOfSquares'</span>, channelImages);
+            <span class="keyword">end</span>
+
+            <span class="comment">% Zero out kissoff views and apply gradwarp</span>
+            kissoffViews = archive.DownloadData.rdb_hdr_rec.rdb_hdr_kissoff_views;
+            channelCombinedImage(:,1:kissoffViews) = 0;
+            channelCombinedImage(:,(end-kissoffViews+1):end) = 0;
+            gradwarpImage = GERecon(<span class="string">'Gradwarp'</span>, abs(channelCombinedImage), sliceInfo.Corners, <span class="string">'XRMW'</span>);
+
+            <span class="keyword">if</span>(archive.DownloadData.rdb_hdr_rec.rdb_hdr_hnover &gt; 0)
+                reconXRes = archive.DownloadData.rdb_hdr_rec.rdb_hdr_rc_xres;
+                reconYRes = archive.DownloadData.rdb_hdr_rec.rdb_hdr_rc_yres;
+                gradwarpImage = gradwarpImage * (256 / (reconXRes * reconYRes));
+            <span class="keyword">end</span>
+
+            <span class="comment">% Rotate/Transpose</span>
+            rotatedTransposedSlice = GERecon(<span class="string">'Orient'</span>, gradwarpImage, sliceInfo.Orientation);
+
+            <span class="comment">% Clip to range of shorts (match product functionality)</span>
+            rotatedTransposedSlice(rotatedTransposedSlice &lt; 0) = 0;
+            rotatedTransposedSlice(rotatedTransposedSlice &gt; 32767) = 32767;
+            finalImage = int16(rotatedTransposedSlice);
+
+            <span class="comment">% Display final image</span>
+            imagesc(finalImage);colormap(gray);colorbar;axis <span class="string">off</span>;title([<span class="string">'Slice: '</span> num2str(geometricSliceNumber) <span class="string">'Phase: '</span> num2str(phaseIndex)]);
+            drawnow;
+
+            <span class="comment">% Compute image number and create dicom image</span>
+            matlabDicomPath = fullfile(archiveFilePath, <span class="string">'matlabDicoms'</span>, filesep);
+            seriesNumber = archive.DownloadData.rdb_hdr_series.se_no * 100;
+            GERecon(<span class="string">'Dicom.Write'</span>, [matlabDicomPath <span class="string">'Image_'</span> num2str(imageNumber, <span class="string">'%03d'</span>) <span class="string">'.dcm'</span>], finalImage, imageNumber, sliceInfo.Orientation, sliceInfo.Corners, seriesNumber);
+            imageNumber = imageNumber + 1;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="EpiScanArchiveRecon_02.png" alt=""> <pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [ ] = EpiScanArchiveRecon( epiScanArchiveFilePath )
+%% EpiScanArchiveRecon - Reconstruct data from an EPI scan archive
+%
+% Copyright 2017 General Electric Company. All rights reserved.
+% GE Proprietary and Confidential Information. Only to be distributed with
+% permission from GE. Resulting outputs are not for diagnostic purposes.
+%
+%   EpiScanArchiveRecon(epiScanArchiveFilePath)
+%   will reconstruct the single-shot EPI data in the given scan archive. 
+%   All secondary input files are obtained from the files contained in the 
+%   scan archive itself. These secondary input files are extracted from the
+%   scan archive when it is loaded.
+%   This script currently supports a basic single-shot EPI reconstruction 
+%   with the following steps/algorithms:
+%       1. Extract Raw Data
+%       2. Row flip based on rowflip.param file in scan archive
+%       3. Static EPI Phase Correction (based on either the ref.h5 file in the
+%          scan archive or the coefficients computed from an integrated
+%          reference pass of a diffusion acquisition)
+%       4. Ramp sampling based on vrgf.dat in scan archive
+%       5. 2D Transform
+%       6. Channel Combination (Sum of Squares or ASSET)
+%       7. Gradwarp
+%       8. DICOM Generation
+%
+%   Support for other EPI specific reconstruction steps (such as
+%   magnitude or complex averaging, realtime field adjustment, etc...) may
+%   be added by following the examples in the existing Epi pfile based 
+%   rehearsal recon scripts
+
+    %% Load the given Epi ScanArchive
+    % Load the given scan archive and extract all secondary input files
+    [archiveFilePath archiveFileName archiveFileExt] = fileparts(epiScanArchiveFilePath);
+    archive = GERecon('Archive.Load', epiScanArchiveFilePath);    
+    
+    %% Load rowflip.param
+    % rowflip.param is used to control which EPI readouts are flipped along
+    % the readout axis. For a single shot scan, this would be every other
+    % readout.
+    rowFlipHandle = GERecon('Epi.LoadRowFlip', 'rowflip.param');    
+    
+    %% Load reference data
+    % Based on the download data in the archive, determine if this scan has
+    % an integrated reference scan or if the reference coefficients should
+    % be loaded from the ref.h5 file on disk. 
+    isIntegratedStaticPC = archive.DownloadData.rdb_hdr_rec.rdb_hdr_ref == 5;
+    isIntegratedRefBitSet = bitget(archive.DownloadData.rdb_hdr_rec.rdb_hdr_pcctrl, 5);   
+    isIntegratedRef = isIntegratedStaticPC || isIntegratedRefBitSet;    
+    firstImageAcquisitionPhase = 0;
+    firstImageDabPacketIndex = 1;
+    if(isIntegratedRef)
+        [phaseCorrectionHandle, nextDabPacketIndex] = EpiReferenceScanRecon(archive, rowFlipHandle);
+        firstImageDabPacketIndex = nextDabPacketIndex;
+        firstImageAcquisitionPhase = 1;
+    else       
+        % Read phase correction coefficients from ref.h5
+        phaseCorrectionHandle = GERecon('Epi.LoadReference', 'ref.h5');
+    end   
+    
+    %% Load vrgf.dat
+    % Look in the scan archive directory for a vrgf.dat file. Certain fMRI
+    % scans may use an alternative vrgf_kernels.dat file. Support may be
+    % added for vrgf_kernels.dat by following the example in
+    % EpiMultiPhaseRecon.m
+    vrgfHandle = GERecon('RampSampling.Load', 'vrgf.dat');    
+    kernelMatrix = GERecon('RampSampling.KernelMatrix', vrgfHandle);
+    figure;
+    subplot(2,1,1);
+    imagesc(kernelMatrix);colormap(gray);colorbar;axis off;title('VRGF Interpolation Kernel Matrix');
+    subplot(2,1,2);
+    numRows = size(kernelMatrix, 1);
+    plot(kernelMatrix(numRows/4, :));title(['Sinc Interpolation Kernel for Interpolated Point: ' num2str(numRows/4) ' of ' num2str(numRows)]);    
+
+    %% Load ASSET Calibration (if it exists)
+    % Check the exam data path for any ASSET calibration files that were
+    % included in the archive. If an ASSET calibration file is included in
+    % the archive then load the calibration here.
+    examDataDirectory = num2str(archive.DownloadData.rdb_hdr_exam.ex_no);
+    useAsset = 0;
+    if(exist(num2str(archive.DownloadData.rdb_hdr_exam.ex_no), 'dir'))
+       % If the exam data directory exists, check if it contains an ASSET calibration file 
+       fileList = dir(examDataDirectory);
+       for i=1:size(fileList,1)
+          findResult = strfind(fileList(i).name, 'Asset');
+          if(size(findResult) > 0)
+             assetCalibrationFile = fullfile(num2str(archive.DownloadData.rdb_hdr_exam.ex_no), fileList(i).name);
+             disp(['Loading Calibration File: ' assetCalibrationFile]); 
+             useAsset = 1;
+             GERecon('Asset.LoadCalibration', assetCalibrationFile);    
+          end
+       end
+    end
+    
+    %% Parameter and variable initialization
+    % Extract information from the archive's DownloadData object to set
+    % parameters used in this reconstruction.
+    % The refViewsTop and refViewsBottom variables are used to discard
+    % readouts acquired for dynamic phase correction. The dynamic phase
+    % correction algorithm is not currently supported by this script.
+    refViewsTop = archive.DownloadData.rdb_hdr_rec.rdb_hdr_extra_frames_top;
+    refViewsBottom = archive.DownloadData.rdb_hdr_rec.rdb_hdr_extra_frames_bot;     
+    imageSize = archive.DownloadData.rdb_hdr_rec.rdb_hdr_im_size;    
+    % Determine if the phase encoding direction was reversed for this scan.
+    % Reverse phase encoding direction is supported for DW-EPI scans or
+    % other single-echo EPI scans. When reverse phase encoding is used, the
+    % image must be reversed along the phase-encoding direction after the
+    % 2D transform.
+    isDiffusion = bitget(archive.DownloadData.rdb_hdr_rec.rdb_hdr_data_collect_type1, 22);
+    numEchoes = archive.DownloadData.rdb_hdr_rec.rdb_hdr_nechoes;
+    flipBitsSet = bitget(archive.DownloadData.rdb_hdr_rec.rdb_hdr_dacq_ctrl,2) || bitget(archive.DownloadData.rdb_hdr_rec.rdb_hdr_dacq_ctrl,3);
+    alternatePhaseEncodingDirection = (flipBitsSet && isDiffusion) || (flipBitsSet && numEchoes == 1);    
+    
+    %% Loop and Recon
+    % Loop over all control packets in this scan archive. Each control
+    % packet corresponds to either an Epi Readout (opcode 6 or 14) or an
+    % end of pass/end of scan(opcode 0). PassDone and ScanDone control
+    % packets do not have data associated with them; thus, only data
+    % associated with opcode 6 (HyperScanOpcode) or 14 (DiffusionHyperScanOpcode)
+    % is reconstructed.
+    % If this scan contained an integrated reference pass, the
+    % EpiReferenceScanRecon script already processed some control packets
+    % and returned the next control packet to process. Thus, the loop
+    % starts from the [firstImageDabPacketIndex] variable and continues until
+    % all control packets are processed.
+    numAcquisitionsPerRepetition = archive.DownloadData.rdb_hdr_rec.rdb_hdr_npasses / archive.DownloadData.rdb_hdr_rec.rdb_hdr_reps;
+    acquisitionPassCounter = 0;
+    phaseIndex = firstImageAcquisitionPhase;
+    imageNumber = 0;
+    figure;    
+    for dabPacketIndex = firstImageDabPacketIndex:archive.ControlCount        
+        % Extract the next control packet and associated data from the scan
+        % archive. Inspect the opcode in the control packet to determine if
+        % the packet contains data to reconstruct.
+        currentControl = GERecon('Archive.Next', archive);        
+        reconstructDataForThisPacket = 0;
+        if(currentControl.opcode == 0)
+            reconstructDataForThisPacket = 0;
+            % For diffusion scans, the same volume may be acquired multiple times for the various diffusion passes (T2, B-Value/Diffusion Direction). 
+            % Thus, when this counter reaches the number of acquisitions per repetition, reset the counter back to 0.
+            acquisitionPassCounter = acquisitionPassCounter + 1;
+            if(acquisitionPassCounter == numAcquisitionsPerRepetition)
+                acquisitionPassCounter = 0;
+                phaseIndex = phaseIndex + 1;
+            end
+        elseif(currentControl.opcode == 6)
+            reconstructDataForThisPacket = 1;
+        elseif(currentControl.opcode == 14)
+            reconstructDataForThisPacket = 1;
+        end
+       
+        if(reconstructDataForThisPacket)       
+            % Obtain slice information for the slice we're about to reconstruct
+            acquisitionPassCounterOneBased = acquisitionPassCounter + 1;
+            oneBasedPassSliceNum = currentControl.sliceNum + 1;
+            sliceInfo = GERecon('Archive.Info', archive, acquisitionPassCounterOneBased, oneBasedPassSliceNum);
+            geometricSliceNumber = sliceInfo.Number;
+            
+            % Extract raw image kSpace. Additional reference views used
+            % with dynamic phase correction are not supported in this
+            % rehearsal recon; thus, they are discarded here. Also, handle 
+            % the bottom up case in which view-increment is negative prior 
+            % to any other processing.
+            kSpace = currentControl.Data;
+            
+            if(currentControl.viewSkip < 0)
+                % This is a bottom up EPI scan. Thus, the kSpace must be
+                % flipped along the phase encoding direction prior to
+                % processing. This is because the raw data is held in
+                % acquisition time order. Since the views are acquired
+                % bottom-up. The first view in the raw data matrix should
+                % actually be the last view of the kSpace matrix.
+                kSpace = flip(kSpace,3);
+            end
+            
+            kSpaceTotalNumViews = size(kSpace,3);                
+            kSpaceWithoutRefViews = kSpace(:,:,(refViewsTop+1):(kSpaceTotalNumViews-refViewsBottom));
+            
+            % Reconstruct each channel
+            numChannels = size(kSpace,2);
+            channelImages = single(zeros(imageSize, imageSize, numChannels));
+            for channel=1:numChannels
+                % Apply rowflip
+                rowFlippedKSpace = GERecon('Epi.ApplyImageRowFlip', rowFlipHandle, squeeze(kSpaceWithoutRefViews(:,channel,:)));                                
+                
+                % Apply phase correction
+                phaseCorrectedKSpace = GERecon('Epi.ApplyPhaseCorrection', phaseCorrectionHandle, rowFlippedKSpace, geometricSliceNumber, channel);
+
+                % Interpolate ramp sampled data
+                interpolatedData = GERecon('RampSampling.Interpolate', vrgfHandle, phaseCorrectedKSpace);
+
+                % Filter, 2D-IFFT
+                image = GERecon('Transform', interpolatedData);
+
+                % If ASSET and Homodyne are both enabled for this scan then 
+                % ASSET is run on both the high pass filtered and low pass 
+                % filtered images generated by the Homodyne algorithm. To 
+                % enable this use case, the Transform command returns the high 
+                % pass filtered and low pass filtered images in indices one and 
+                % two of the third dimension of the return image. For this 
+                % case, the channel images array must have space to store the
+                % additional high pass filtered / low pass filtered images. 
+                % Resize the channelImages matrix here to enable this use case.
+                % Note that this resize happens only once, the first time 
+                % through this loop.
+                if( (size(image,3) > 1) && (size(channelImages,4) == 1) )
+                    channelImages = single(zeros(size(channelImages,1), size(channelImages,2), size(channelImages,3), 2));                    
+                end
+
+                channelImages(:,:,channel, :) = image;
+            end
+            
+            % As described above, if a reverse phase encoding direction was
+            % used for this scan, the data must be flipped along the phase
+            % encoding direction after the 2D transform. This processing is
+            % done here.
+            if(alternatePhaseEncodingDirection)
+                channelImages = fliplr(channelImages);
+            end
+            
+            % Channel combine processing - either Sum of Squares or ASSET
+            if(useAsset)
+                channelCombinedImage = GERecon('Asset.Unalias', channelImages, sliceInfo.Corners);
+            else                
+                channelCombinedImage = GERecon('SumOfSquares', channelImages);
+            end            
+
+            % Zero out kissoff views and apply gradwarp
+            kissoffViews = archive.DownloadData.rdb_hdr_rec.rdb_hdr_kissoff_views;
+            channelCombinedImage(:,1:kissoffViews) = 0;
+            channelCombinedImage(:,(end-kissoffViews+1):end) = 0;
+            gradwarpImage = GERecon('Gradwarp', abs(channelCombinedImage), sliceInfo.Corners, 'XRMW');
+
+            if(archive.DownloadData.rdb_hdr_rec.rdb_hdr_hnover > 0)             
+                reconXRes = archive.DownloadData.rdb_hdr_rec.rdb_hdr_rc_xres;
+                reconYRes = archive.DownloadData.rdb_hdr_rec.rdb_hdr_rc_yres;
+                gradwarpImage = gradwarpImage * (256 / (reconXRes * reconYRes));
+            end
+            
+            % Rotate/Transpose
+            rotatedTransposedSlice = GERecon('Orient', gradwarpImage, sliceInfo.Orientation);            
+
+            % Clip to range of shorts (match product functionality)
+            rotatedTransposedSlice(rotatedTransposedSlice < 0) = 0;
+            rotatedTransposedSlice(rotatedTransposedSlice > 32767) = 32767;
+            finalImage = int16(rotatedTransposedSlice);
+
+            % Display final image
+            imagesc(finalImage);colormap(gray);colorbar;axis off;title(['Slice: ' num2str(geometricSliceNumber) 'Phase: ' num2str(phaseIndex)]);
+            drawnow;
+
+            % Compute image number and create dicom image
+            matlabDicomPath = fullfile(archiveFilePath, 'matlabDicoms', filesep);
+            seriesNumber = archive.DownloadData.rdb_hdr_series.se_no * 100;
+            GERecon('Dicom.Write', [matlabDicomPath 'Image_' num2str(imageNumber, '%03d') '.dcm'], finalImage, imageNumber, sliceInfo.Orientation, sliceInfo.Corners, seriesNumber);
+            imageNumber = imageNumber + 1;            
+        end
+    end
+end
+
+
+##### SOURCE END #####
+--></body></html>

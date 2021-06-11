@@ -1,0 +1,759 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>EpiMultiPhaseRecon</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-05-17"><meta name="DC.source" content="EpiMultiPhaseRecon.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">EpiMultiPhaseRecon</a></li><li><a href="#3">Determine secondary input locations</a></li><li><a href="#4">Load reference data</a></li><li><a href="#5">Load VRGF interpolation kernels</a></li><li><a href="#6">Load Asset Calibration (if applicable)</a></li><li><a href="#7">Load rowflip.param (if applicable)</a></li><li><a href="#8">Initialize workspace and header variables</a></li><li><a href="#9">Extract Raw Data</a></li><li><a href="#10">Apply Phase Correction</a></li><li><a href="#11">Visualize dynamic coefficients</a></li><li><a href="#12">Sinc Interpolation for Ramp Sampled Data</a></li><li><a href="#13">Channel combination</a></li><li><a href="#14">Image Finalization</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [ finalImages ] = EpiMultiPhaseRecon(pfileFullPath)
+</pre><h2>EpiMultiPhaseRecon<a name="2"></a></h2><p>Copyright 2017 General Electric Company. All rights reserved. GE Proprietary and Confidential Information. Only to be distributed with permission from GE. Resulting outputs are not for diagnostic purposes.</p><pre class="language-matlab">Reconstruct <span class="string">multi-phase</span> <span class="string">Epi</span> <span class="string">data.</span> <span class="string">This</span> <span class="string">script</span> <span class="string">takes</span> <span class="string">additional</span>
+reference <span class="string">views</span> <span class="string">acquired</span> <span class="string">at</span> <span class="string">the</span> <span class="string">beginning</span> <span class="string">of</span> <span class="string">an</span> <span class="string">Epi</span> <span class="string">echo</span> <span class="string">train</span> <span class="string">into</span>
+account. These views <span class="string">are</span> <span class="string">used</span> <span class="string">to</span> <span class="string">dynamically</span> <span class="string">update</span> <span class="string">phase</span> <span class="string">correction</span>
+coefficients <span class="string">throughout</span> <span class="string">a</span> <span class="string">scan.</span> <span class="string">The</span> <span class="string">additional</span> <span class="string">reference</span> <span class="string">views</span> <span class="string">can</span> <span class="string">be</span>
+acquired <span class="string">using</span> <span class="string">the</span> <span class="string">GE</span> <span class="string">fMRI</span> <span class="string">(Brainwave)</span> <span class="string">or</span> <span class="string">Non-Brainwave</span> <span class="string">sequences.</span>
+</pre><pre class="language-matlab">EpiMultiPhaseRecon(pfile)
+will <span class="string">reconstruct</span> <span class="string">the</span> <span class="string">multi-phase</span> <span class="string">Epi</span> <span class="string">data</span> <span class="string">in</span> <span class="string">the</span> <span class="string">pfile.</span> <span class="string">The</span> <span class="string">script</span> <span class="string">will</span>
+look <span class="string">in</span> <span class="string">the</span> <span class="string">following</span> <span class="string">locations</span> <span class="string">for</span> <span class="string">all</span> <span class="string">secondary</span> <span class="string">inputs.</span>
+Reference <span class="string">data</span> <span class="string">-</span> <span class="string">First</span> <span class="string">look</span> <span class="string">for</span> <span class="string">ref.dat</span> <span class="string">in</span> <span class="string">the</span> <span class="string">pfile</span> <span class="string">directory.</span> <span class="string">If</span>
+ref.dat cannot <span class="string">be</span> <span class="string">found</span>, look <span class="string">for</span> <span class="string">a</span> <span class="string">reference</span> <span class="string">pfile</span> <span class="string">in</span> <span class="string">a</span> <span class="string">'ref'</span>
+subdirectory (fileFullPath/ref/Prrrrr.7) where <span class="string">Prrrrr.7</span> <span class="string">is</span> <span class="string">the</span>
+reference <span class="string">pfile</span> <span class="string">and</span> <span class="string">the</span> <span class="string">reference</span> <span class="string">pfile</span> <span class="string">run</span> <span class="string">number</span> <span class="string">is</span> <span class="string">equal</span> <span class="string">to</span> <span class="string">the</span> <span class="string">scan</span>
+pfile <span class="string">run</span> <span class="string">number.</span>
+Sinc <span class="string">Interpolation</span> <span class="string">Kernels</span> <span class="string">-</span> <span class="string">First</span> <span class="string">look</span> <span class="string">for</span> <span class="string">vrgf.dat</span> <span class="string">in</span> <span class="string">the</span> <span class="string">pfile</span>
+directory. If vrgf.dat cannot <span class="string">be</span> <span class="string">found</span>, look <span class="string">for</span> <span class="string">vrgf_kernels.dat</span> <span class="string">in</span>
+the <span class="string">pfile</span> <span class="string">directory.</span>
+Asset <span class="string">Calibration</span> <span class="string">-</span> <span class="string">First</span> <span class="string">look</span> <span class="string">for</span> <span class="string">AssetCalibration.h5</span> <span class="string">in</span> <span class="string">the</span> <span class="string">pfile</span>
+directory. If AssetCalibration.h5 cannot <span class="string">be</span> <span class="string">found</span> <span class="string">then</span> <span class="string">use</span> <span class="string">Sum</span> <span class="string">of</span>
+Squares <span class="string">channel</span> <span class="string">combination.</span>
+Row <span class="string">Flip</span> <span class="string">Parameters</span> <span class="string">-</span> <span class="string">Look</span> <span class="string">for</span> <span class="string">rowflip.param</span> <span class="string">in</span> <span class="string">the</span> <span class="string">pfile</span> <span class="string">directory.</span>
+If <span class="string">found</span>, apply <span class="string">rowflip</span> <span class="string">to</span> <span class="string">reference</span> <span class="string">views</span> <span class="string">(image views are already</span>
+flipped <span class="string">in</span> <span class="string">the</span> <span class="string">pfile). If not found, do not apply rowflip to reference</span>
+views. The reference <span class="string">view</span> <span class="string">rowflip</span> <span class="string">is</span> <span class="string">not</span> <span class="string">essential</span> <span class="string">but</span> <span class="string">is</span> <span class="string">included</span> <span class="string">for</span>
+completeness.
+</pre><h2>Determine secondary input locations<a name="3"></a></h2><p>If the number of arguments supplied is greater than 1 then the user supplied absolute locations for all secondary inputs. If the number of arguments is equal to 1 then look in the pfile directory for secondary inputs.</p><pre class="codeinput">    [pfilePath pfileName pfileExt] = fileparts(pfileFullPath);
+
+    <span class="comment">% Look for reference data</span>
+    refDotDatPath = fullfile(pfilePath, <span class="string">'ref.dat'</span>);
+    refDotH5Path =  fullfile(pfilePath, <span class="string">'ref.h5'</span>);
+    <span class="keyword">if</span>(exist(refDotDatPath, <span class="string">'file'</span>) == 2)
+        <span class="comment">% Found reference data, use ref.dat in pfile directory</span>
+        referenceData = refDotDatPath;
+    <span class="keyword">elseif</span>(exist(refDotH5Path, <span class="string">'file'</span>) == 2)
+        referenceData = refDotH5Path;
+    <span class="keyword">else</span>
+        <span class="comment">% ref.dat is not in pfile directory, look for reference pfile</span>
+        <span class="comment">% in ref sub-directory</span>
+        refPfilePath = fullfile(pfilePath, <span class="string">'ref'</span>, [pfileName pfileExt]);
+        <span class="keyword">if</span>(exist(refPfilePath, <span class="string">'file'</span>) == 2)
+            <span class="comment">% Found reference data, use reference pfile</span>
+            referenceData = refPfilePath;
+        <span class="keyword">else</span>
+            <span class="comment">% Could not find reference data!</span>
+            disp(<span class="string">'Could not find reference data.'</span>);
+            <span class="keyword">return</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% Look for vrgf data</span>
+    vrgfDotDatPath = fullfile(pfilePath, <span class="string">'vrgf.dat'</span>);
+    <span class="keyword">if</span>(exist(vrgfDotDatPath, <span class="string">'file'</span>) == 2)
+        <span class="comment">% Found vrgf.dat, use for vrgf interpolation kernels</span>
+        vrgfInterpKernels = vrgfDotDatPath;
+    <span class="keyword">else</span>
+        <span class="comment">% Look for vrgf_kernels.dat</span>
+        vrgfKernelsDotDatPath = fullfile(pfilePath, <span class="string">'vrgf_kernels.dat'</span>);
+        <span class="keyword">if</span>(exist(vrgfKernelsDotDatPath, <span class="string">'file'</span>) == 2)
+            vrgfInterpKernels = vrgfKernelsDotDatPath;
+        <span class="keyword">else</span>
+            <span class="comment">% Could not find vrgf interpolation kernels!</span>
+            disp(<span class="string">'Could not find vrgf interpolation kernels.'</span>);
+            <span class="keyword">return</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% Look for AssetCalibration. Note that if you have a calibration pfile</span>
+    <span class="comment">% you can generate the AssetCalibration.h5 file using this command:</span>
+    <span class="comment">%</span>
+    <span class="comment">%   GERecon('Calibration.Process', 'pathToCalPfile/Pxxxxx.7').</span>
+    <span class="comment">%</span>
+    <span class="comment">% The calibration HDF5 file will be saved in the calibration pfile's</span>
+    <span class="comment">% directory.</span>
+    assetCalibrationPath = fullfile(pfilePath, <span class="string">'AssetCalibration.h5'</span>);
+    <span class="keyword">if</span>(exist(assetCalibrationPath, <span class="string">'file'</span>) == 2)
+        useAsset = 1;
+        assetCalibration = assetCalibrationPath;
+    <span class="keyword">else</span>
+        useAsset = 0;
+    <span class="keyword">end</span>
+
+    <span class="comment">% This flag may be used to control the number of figures plotted during</span>
+    <span class="comment">% recon</span>
+    verboseFigures = 1;
+</pre><pre class="codeoutput">Could not find reference data.
+</pre><h2>Load reference data<a name="4"></a></h2><p>Inspect the reference parameter to determine if a ref.dat file was provided or if a reference pfile was provided. If a ref.dat file is provided, load the ref.dat file into a phase correction reference handle. If a reference pfile is provided, use the pfile to compute phase correction coefficients. The coefficients are stored by the <a href="matlab:doc('EpiComputeAndApplyPhaseCorrection')">EpiComputeAndApplyPhaseCorrection</a> script in a phase correction reference handle which is returned to this caller. The phase correction reference handle will be used later in this script to apply phase correction.</p><pre class="codeinput">    <span class="keyword">if</span>(strcmp(<span class="string">'.7'</span>, referenceData(end-1:end)))
+        <span class="comment">% Reference pfile was provided, load that and compute coefficients</span>
+        phaseCorrectionHandle = EpiComputeAndApplyPhaseCorrection(referenceData);
+
+        <span class="comment">% Load pfile after loading and computing coefficients from ref pfile</span>
+        pfileHandle = GERecon(<span class="string">'Pfile.Load'</span>, pfileFullPath);
+        header = GERecon(<span class="string">'Pfile.Header'</span>, pfileHandle);
+    <span class="keyword">else</span>
+        <span class="comment">% Load pfile before loading ref.dat</span>
+        pfileHandle = GERecon(<span class="string">'Pfile.Load'</span>, pfileFullPath);
+        header = GERecon(<span class="string">'Pfile.Header'</span>, pfileHandle);
+
+        <span class="comment">% ref.dat was provided, load it</span>
+        phaseCorrectionHandle = GERecon(<span class="string">'Epi.LoadReference'</span>, referenceData);
+    <span class="keyword">end</span>
+</pre><h2>Load VRGF interpolation kernels<a name="5"></a></h2><p>VRGF (variable readout gradient filtering) refers to sampling data on the gradient ramps during data acquisition. During recon, a sinc interpolation is performed to interpolate non-linearly sampled frequency data (i.e. data sampled on the gradient ramps) to linearly sampled frequency data. The sinc interpolation kernels that are used for each point in the interpolated output are contained in a vrgf.dat or vrgf_kernels.dat file. The vrgf.dat file contains a full sinc function (i.e. sinc function length = readout direction acquisition size). The vrgf_kernels.dat file contains a truncated sinc interpolation kernel (i.e. sinc function length &lt; readout direction acquisition size). Either the full or truncated sinc functions may be used for recon. To match product functionality, use vrgf_kernels.dat for fMRI scans and vrgf.dat for all other scans.</p><pre class="codeinput">    vrgfHandle = GERecon(<span class="string">'RampSampling.Load'</span>, vrgfInterpKernels);
+    kernelMatrix = GERecon(<span class="string">'RampSampling.KernelMatrix'</span>, vrgfHandle);
+    figure;
+    subplot(2,1,1);
+    imagesc(kernelMatrix);colormap(gray);colorbar;axis <span class="string">off</span>;title(<span class="string">'VRGF Interpolation Kernel Matrix'</span>);
+    subplot(2,1,2);
+    numRows = size(kernelMatrix, 1);
+    plot(kernelMatrix(numRows/4, :));title([<span class="string">'Sinc Interpolation Kernel for Interpolated Point: '</span> num2str(numRows/4) <span class="string">' of '</span> num2str(numRows)]);
+</pre><h2>Load Asset Calibration (if applicable)<a name="6"></a></h2><p>If the user specified an Asset calibration file and asset is enabled for this scan, read the asset calibration.</p><pre class="codeinput">    assetEnabled = (header.RawHeader.asset == 2 || header.RawHeader.asset == 7);
+    <span class="keyword">if</span>((useAsset == 1) &amp;&amp; assetEnabled)
+        GERecon(<span class="string">'Asset.LoadCalibration'</span>, assetCalibration);
+    <span class="keyword">end</span>
+</pre><h2>Load rowflip.param (if applicable)<a name="7"></a></h2><p>If a rowflip filepath was specified, load the rowflip file. The reference views acquired for use by dynamic phase correction are not flipped in the pfile. Image views are flipped in the pfile. Dynamic phase correction still works if the reference views are left un-flipped. The reference view flip is included here for completeness.</p><pre class="codeinput">    pfilePath = fileparts(pfileFullPath);
+    rowFlipFilePath = fullfile(pfilePath, <span class="string">'rowflip.param'</span>);
+    <span class="keyword">if</span>(exist(rowFlipFilePath, <span class="string">'file'</span>) == 2 &amp;&amp; ~pfileHandle.areReferenceViewsFlipped)
+        rowFlipHandle = GERecon(<span class="string">'Epi.LoadRowFlip'</span>, rowFlipFilePath);
+        applyReferenceRowFlip = 1;
+    <span class="keyword">else</span>
+        applyReferenceRowFlip = 0;
+    <span class="keyword">end</span>
+</pre><h2>Initialize workspace and header variables<a name="8"></a></h2><p>Pull values from the raw header and use these values to allocate space for intermediate data.</p><pre class="codeinput">    imageSize = header.RawHeader.im_size;
+    refViewsTop = header.RawHeader.extra_frames_top;
+    refViewsBottom = header.RawHeader.extra_frames_bot;
+    totalNumRefViews = refViewsTop + refViewsBottom;
+    totalImageViews = header.RawHeader.da_yres - totalNumRefViews - 1;
+
+    <span class="comment">% Allocate intermediate data space</span>
+    channelImages = single(zeros(imageSize, imageSize, pfileHandle.channels));
+    finalImages = int16(zeros(imageSize, imageSize, pfileHandle.slices));
+    rawImageViews = single(zeros(header.RawHeader.da_xres, totalImageViews, pfileHandle.channels));
+    rawReferenceViews = single(zeros(header.RawHeader.da_xres, totalNumRefViews, pfileHandle.channels));
+
+    <span class="comment">% Create figures and allocate dynamic coefficient space for visualizing</span>
+    <span class="comment">% dynamic phase correction coefficient changes over the course of a</span>
+    <span class="comment">% multi-phase scan</span>
+    imagesFigureHandle = figure;
+    dynamicCoefficientsFigureHandle = figure;
+    updatedCoefficients = zeros(totalImageViews, pfileHandle.channels, 2);
+    constantDynamicCoefficients = zeros(pfileHandle.phases, 2);
+    linearDynamicCoefficients = zeros(pfileHandle.phases, 2);
+
+    <span class="comment">% Initialize image number to zero and begin looping over all phases</span>
+    <span class="comment">% and slices in the scan</span>
+    imageNumber = 0;
+    <span class="keyword">for</span> phase = 1:(pfileHandle.phases)
+        <span class="keyword">for</span> slice = 1:(pfileHandle.slices)
+</pre><h2>Extract Raw Data<a name="9"></a></h2><p>Dynamic phase correction works across all channels, thus extract all channel data for the current slice (both reference and image views) into rawImageViews and rawReferenceViews matrices.</p><pre class="codeinput">            <span class="keyword">for</span> channel = 1:(pfileHandle.channels)
+                <span class="comment">% Echo dimension is unused for baseic Epi scans</span>
+                echo = 1;
+                kSpace = GERecon(<span class="string">'Pfile.KSpace'</span>, slice, echo, channel, phase);
+                corners = GERecon(<span class="string">'Pfile.Corners'</span>, slice);
+                orientation = GERecon(<span class="string">'Pfile.Orientation'</span>, slice);
+
+                kSpaceTotalNumViews = size(kSpace,2);
+                rawImageViews(:,:,channel) = kSpace(:,(refViewsTop+1):(kSpaceTotalNumViews-refViewsBottom));
+
+                <span class="keyword">if</span>(refViewsTop &gt; 0)
+                    refViews = kSpace(:,1:refViewsTop);
+                <span class="keyword">else</span>
+                    refViews = kSpace(:,(kSpaceTotalNumViews-refViewsBottom+1):end);
+                <span class="keyword">end</span>
+
+                <span class="comment">% Reference views are not flipped in a pfile while image</span>
+                <span class="comment">% views are flipped. Thus, flip reference views here</span>
+                <span class="keyword">if</span>(applyReferenceRowFlip == 1 &amp;&amp; totalNumRefViews &gt; 0)
+                    rowFlippedRefViews = GERecon(<span class="string">'Epi.ApplyReferenceRowFlip'</span>, rowFlipHandle, refViews);
+                    rawReferenceViews(:,:,channel) = rowFlippedRefViews;
+                <span class="keyword">else</span>
+                    rawReferenceViews(:,:,channel) = refViews;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+</pre><h2>Apply Phase Correction<a name="10"></a></h2><p>If reference views were acquired, apply dynamic phase correction. If no reference views were acquired default to static phase correction using coefficients from the reference scan.</p><pre class="codeinput">            <span class="keyword">if</span>(totalNumRefViews &gt; 0)
+                <span class="comment">% To apply dynamic phase correction pass the current phase</span>
+                <span class="comment">% correction handle and slice index along with the</span>
+                <span class="comment">% rawImageViews and  rawReferenceViews matrices (for the</span>
+                <span class="comment">% current slice) to the dynamic phase correction command. The</span>
+                <span class="comment">% static coefficients for the current slice (computed during</span>
+                <span class="comment">% reference scan recon) will be extracted from the phase</span>
+                <span class="comment">% correction handle and updated based on the rawImageViews and</span>
+                <span class="comment">% rawReferenceViews.</span>
+                <span class="comment">% The first time that the dynamic phase correction command is</span>
+                <span class="comment">% called for each slice, the rawImageViews and</span>
+                <span class="comment">% rawReferenceViews that are provided will be cached as the</span>
+                <span class="comment">% baseline phase. All future calls to dynamic phase correction</span>
+                <span class="comment">% for the given slice will compare the rawImageViews and</span>
+                <span class="comment">% rawReferenceViews to the cached baseline phase to compute</span>
+                <span class="comment">% updated phase correction coefficients.</span>
+                <span class="comment">% The updated coefficients that are applied to the</span>
+                <span class="comment">% rawImageViews are optionally returned (if the user specifies</span>
+                <span class="comment">% a second return argument). Note that for product Epi scans</span>
+                <span class="comment">% with Asset, the same coefficients are applied to all channels</span>
+                <span class="comment">% of a given slice. For this case, the updated coefficients</span>
+                <span class="comment">% returned to the user have a channel dimension size of 1.</span>
+                [phaseCorrectedKSpace updatedCoefficients] = GERecon(<span class="string">'Epi.ApplyDynamicPhaseCorrection'</span>, phaseCorrectionHandle, rawImageViews, rawReferenceViews, slice);
+            <span class="keyword">else</span>
+                <span class="comment">% Apply static phase correction for each channel based on</span>
+                <span class="comment">% the coefficients held in the phase correction handle</span>
+                <span class="keyword">for</span> channel = 1:pfileHandle.channels
+                    phaseCorrectedKSpace(:,:,channel) = GERecon(<span class="string">'Epi.ApplyPhaseCorrection'</span>, phaseCorrectionHandle, rawImageViews(:,:,channel), slice, channel);
+                    currentChannelCoefs = GERecon(<span class="string">'Epi.RetrieveCoefficients'</span>, phaseCorrectionHandle, slice, channel);
+                    updatedCoefficients(:,channel,:) = currentChannelCoefs;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+</pre><h2>Visualize dynamic coefficients<a name="11"></a></h2><p>Plot the phase correction coefficients applied for each phase. If dynamic phase correction is used, these coefficients will change with each phase of the scan. If dynamic phase correction is not used then these coefficients will remain constant throughout the scan. For demonstration purposes, plot the linear and constant coefficients for the two center views of slice index 0. Note that each view is shifted toward the center of kSpace. Thus, one view shifts left while an adjacent view shifts right. The shift is accomplished by applying a phase ramp along each readout in x,ky space and then transforming back to kx,ky space. Because each view shifts towards the center of kSpace, the signs on coefficients for adjacent views are negated. Dynamic phase correction is only supported for single shot Epi scans.</p><pre class="codeinput">            <span class="keyword">if</span>(verboseFigures == 1 &amp;&amp; (slice == floor(pfileHandle.slices / 2)))
+                constantIndex = 1; <span class="comment">% Constant coefficients are at third index 1 in the updatedCoefficients matrix</span>
+                linearIndex = 2; <span class="comment">% Linear coefficients are at third index 2 in the updatedCoefficients matrix</span>
+                firstChannel = 1; <span class="comment">% Only plot the first channel for visualization purposes</span>
+                centerView = size(updatedCoefficients, 1) / 2; <span class="comment">% Only plot the center view for visualization purposes</span>
+                centerViewPlusOne = centerView + 1;
+                constantDynamicCoefficients(phase, 1) = updatedCoefficients(centerView, firstChannel, constantIndex);
+                linearDynamicCoefficients(phase, 1) = updatedCoefficients(centerView, firstChannel, linearIndex);
+                constantDynamicCoefficients(phase, 2) = updatedCoefficients(centerViewPlusOne, firstChannel, constantIndex);
+                linearDynamicCoefficients(phase, 2) = updatedCoefficients(centerViewPlusOne, firstChannel, linearIndex);
+
+                figure(dynamicCoefficientsFigureHandle);
+                subplot(2,2,1);
+                plot(constantDynamicCoefficients(1:phase,1), <span class="string">'-o'</span>);title([<span class="string">'Constant Coefficients, View: '</span> num2str(centerView) <span class="string">' (radians)'</span>]);xlabel(<span class="string">'Phase Index'</span>);
+                subplot(2,2,2);
+                plot(constantDynamicCoefficients(1:phase,2), <span class="string">'-o'</span>);title([<span class="string">'Constant Coefficients, View: '</span> num2str(centerViewPlusOne) <span class="string">' (radians)'</span>]);xlabel(<span class="string">'Phase Index'</span>);
+                subplot(2,2,3);
+                plot(linearDynamicCoefficients(1:phase,1), <span class="string">'-o'</span>);title([<span class="string">'Linear Coefficients, View: '</span> num2str(centerView) <span class="string">' (radians/pixel)'</span>]);xlabel(<span class="string">'Phase Index'</span>);
+                subplot(2,2,4);
+                plot(linearDynamicCoefficients(1:phase,2), <span class="string">'-o'</span>);title([<span class="string">'Linear Coefficients, View: '</span> num2str(centerViewPlusOne) <span class="string">' (radians/pixel)'</span>]);xlabel(<span class="string">'Phase Index'</span>);
+                drawnow;
+            <span class="keyword">end</span>
+</pre><h2>Sinc Interpolation for Ramp Sampled Data<a name="12"></a></h2><pre class="codeinput">            <span class="keyword">for</span> channel = 1:(pfileHandle.channels)
+                <span class="comment">% Interpolate ramp sampled data to linearly spaced samples</span>
+                <span class="comment">% in frequency space.</span>
+                phaseCorrectedKSpaceCurrentChannel = phaseCorrectedKSpace(:,:,channel);
+                interpolatedData = GERecon(<span class="string">'RampSampling.Interpolate'</span>, vrgfHandle, phaseCorrectedKSpaceCurrentChannel);
+
+                image = GERecon(<span class="string">'Transform'</span>, interpolatedData);
+
+                <span class="comment">% If ASSET and Homodyne are both enabled for this scan then</span>
+                <span class="comment">% ASSET is run on both the high pass filtered and low pass</span>
+                <span class="comment">% filtered images generated by the Homodyne algorithm. To</span>
+                <span class="comment">% enable this use case, the Transform command returns the high</span>
+                <span class="comment">% pass filtered and low pass filtered images in indices one and</span>
+                <span class="comment">% two of the third dimension of the return image. For this</span>
+                <span class="comment">% case, the channel images array must have space to store the</span>
+                <span class="comment">% additional high pass filtered / low pass filtered images.</span>
+                <span class="comment">% Resize the channelImages matrix here to enable this use case.</span>
+                <span class="comment">% Note that this resize happens only once, the first time</span>
+                <span class="comment">% through this loop.</span>
+                <span class="keyword">if</span>( (size(image,3) &gt; 1) &amp;&amp; (size(channelImages,4) == 1) )
+                    channelImages = single(zeros(size(channelImages,1), size(channelImages,2), size(channelImages,3), 2));
+                <span class="keyword">end</span>
+
+                channelImages(:,:,channel,:) = image;
+            <span class="keyword">end</span>
+</pre><h2>Channel combination<a name="13"></a></h2><p>Combine channel images using either Asset or a Sum of Squares channel combination.</p><pre class="codeinput">            <span class="keyword">if</span>(useAsset)
+                channelCombinedImage = GERecon(<span class="string">'Asset.Unalias'</span>, channelImages, corners);
+            <span class="keyword">else</span>
+                channelCombinedImage = GERecon(<span class="string">'SumOfSquares'</span>, channelImages);
+            <span class="keyword">end</span>
+</pre><h2>Image Finalization<a name="14"></a></h2><p>Zero out kissoff views and apply gradwarp.</p><pre class="codeinput">            kissoffViews = header.RawHeader.kissoff_views;
+            channelCombinedImage(:,1:kissoffViews) = 0;
+            channelCombinedImage(:,(end-kissoffViews+1):end) = 0;
+            gradwarpImage = GERecon(<span class="string">'Gradwarp'</span>, abs(channelCombinedImage), corners, <span class="string">'XRMW'</span>);
+
+            <span class="comment">% Apply final scaling for partial ky scans (this scaling</span>
+            <span class="comment">% matches product behavior)</span>
+            <span class="keyword">if</span>(header.RawHeader.hnover &gt; 0)
+                gradwarpImage = gradwarpImage * (256 / (header.RawHeader.rc_xres * header.RawHeader.rc_yres));
+            <span class="keyword">end</span>
+
+            <span class="comment">% Rotate/Transpose</span>
+            rotatedTransposedSlice = GERecon(<span class="string">'Orient'</span>, gradwarpImage, orientation);
+
+            <span class="comment">% Clip to range of shorts, convert to short, and write Dicom</span>
+            <span class="comment">% image</span>
+            rotatedTransposedSlice(rotatedTransposedSlice &lt; 0) = 0;
+            rotatedTransposedSlice(rotatedTransposedSlice &gt; 32767) = 32767;
+            finalImages(:,:,slice) = int16(rotatedTransposedSlice);
+
+            <span class="keyword">if</span>( verboseFigures == 1 || ( (phase == pfileHandle.phases) &amp;&amp; (slice == pfileHandle.slices) ) )
+                figure(imagesFigureHandle);
+                imagesc(finalImages(:,:,slice));colormap(gray);colorbar;axis <span class="string">off</span>;title([<span class="string">'Slice: '</span> num2str(slice) <span class="string">' Phase: '</span> num2str(phase)]);
+                drawnow;
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span>(imageNumber &lt; 10)
+                imageNumberString = [<span class="string">'00'</span> num2str(imageNumber)];
+            <span class="keyword">elseif</span>(imageNumber &lt; 100)
+                imageNumberString = [<span class="string">'0'</span> num2str(imageNumber)];
+            <span class="keyword">else</span>
+                imageNumberString = num2str(imageNumber);
+            <span class="keyword">end</span>
+
+            matlabDicomPath = fullfile(pfilePath, <span class="string">'matlabDicoms'</span>, filesep);
+            GERecon(<span class="string">'Dicom.Write'</span>, [matlabDicomPath <span class="string">'Image_'</span> imageNumberString <span class="string">'.dcm'</span>], finalImages(:,:,slice), imageNumber, orientation, corners, (header.SeriesData.se_no*100));
+
+            imageNumber = imageNumber + 1;
+</pre><pre class="codeinput">        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [ finalImages ] = EpiMultiPhaseRecon(pfileFullPath)
+%% EpiMultiPhaseRecon
+%
+% Copyright 2017 General Electric Company. All rights reserved.
+% GE Proprietary and Confidential Information. Only to be distributed with
+% permission from GE. Resulting outputs are not for diagnostic purposes.
+%   
+%   Reconstruct multi-phase Epi data. This script takes additional
+%   reference views acquired at the beginning of an Epi echo train into
+%   account. These views are used to dynamically update phase correction
+%   coefficients throughout a scan. The additional reference views can be 
+%   acquired using the GE fMRI (Brainwave) or Non-Brainwave sequences.
+%
+%   EpiMultiPhaseRecon(pfile)
+%   will reconstruct the multi-phase Epi data in the pfile. The script will
+%   look in the following locations for all secondary inputs.
+%   Reference data - First look for ref.dat in the pfile directory. If
+%   ref.dat cannot be found, look for a reference pfile in a 'ref'
+%   subdirectory (fileFullPath/ref/Prrrrr.7) where Prrrrr.7 is the
+%   reference pfile and the reference pfile run number is equal to the scan
+%   pfile run number.
+%   Sinc Interpolation Kernels - First look for vrgf.dat in the pfile
+%   directory. If vrgf.dat cannot be found, look for vrgf_kernels.dat in
+%   the pfile directory.
+%   Asset Calibration - First look for AssetCalibration.h5 in the pfile
+%   directory. If AssetCalibration.h5 cannot be found then use Sum of
+%   Squares channel combination.
+%   Row Flip Parameters - Look for rowflip.param in the pfile directory. 
+%   If found, apply rowflip to reference views (image views are already 
+%   flipped in the pfile). If not found, do not apply rowflip to reference 
+%   views. The reference view rowflip is not essential but is included for 
+%   completeness.
+
+    %% Determine secondary input locations
+    % If the number of arguments supplied is greater than 1 then the user
+    % supplied absolute locations for all secondary inputs. If the number
+    % of arguments is equal to 1 then look in the pfile directory for
+    % secondary inputs.
+    [pfilePath pfileName pfileExt] = fileparts(pfileFullPath);
+
+    % Look for reference data
+    refDotDatPath = fullfile(pfilePath, 'ref.dat');
+    refDotH5Path =  fullfile(pfilePath, 'ref.h5');
+    if(exist(refDotDatPath, 'file') == 2)
+        % Found reference data, use ref.dat in pfile directory
+        referenceData = refDotDatPath;
+    elseif(exist(refDotH5Path, 'file') == 2)
+        referenceData = refDotH5Path;
+    else
+        % ref.dat is not in pfile directory, look for reference pfile 
+        % in ref sub-directory
+        refPfilePath = fullfile(pfilePath, 'ref', [pfileName pfileExt]);
+        if(exist(refPfilePath, 'file') == 2)
+            % Found reference data, use reference pfile
+            referenceData = refPfilePath;             
+        else
+            % Could not find reference data!
+            disp('Could not find reference data.');        
+            return;
+        end
+    end
+
+    % Look for vrgf data
+    vrgfDotDatPath = fullfile(pfilePath, 'vrgf.dat');
+    if(exist(vrgfDotDatPath, 'file') == 2)
+        % Found vrgf.dat, use for vrgf interpolation kernels
+        vrgfInterpKernels = vrgfDotDatPath;
+    else
+        % Look for vrgf_kernels.dat
+        vrgfKernelsDotDatPath = fullfile(pfilePath, 'vrgf_kernels.dat');
+        if(exist(vrgfKernelsDotDatPath, 'file') == 2)
+            vrgfInterpKernels = vrgfKernelsDotDatPath;    
+        else
+            % Could not find vrgf interpolation kernels!
+            disp('Could not find vrgf interpolation kernels.');
+            return;
+        end
+    end
+
+    % Look for AssetCalibration. Note that if you have a calibration pfile
+    % you can generate the AssetCalibration.h5 file using this command:
+    %
+    %   GERecon('Calibration.Process', 'pathToCalPfile/Pxxxxx.7').
+    %
+    % The calibration HDF5 file will be saved in the calibration pfile's
+    % directory.
+    assetCalibrationPath = fullfile(pfilePath, 'AssetCalibration.h5');
+    if(exist(assetCalibrationPath, 'file') == 2)
+        useAsset = 1;
+        assetCalibration = assetCalibrationPath;
+    else
+        useAsset = 0;
+    end
+    
+    % This flag may be used to control the number of figures plotted during
+    % recon
+    verboseFigures = 1;
+
+    %% Load reference data
+    % Inspect the reference parameter to determine if a ref.dat file was
+    % provided or if a reference pfile was provided.
+    % If a ref.dat file is provided, load the ref.dat file into a phase 
+    % correction reference handle.
+    % If a reference pfile is provided, use the pfile to compute phase
+    % correction coefficients. The coefficients are stored by the
+    % <matlab:doc('EpiComputeAndApplyPhaseCorrection') EpiComputeAndApplyPhaseCorrection> script in a phase correction
+    % reference handle which is returned to this caller.
+    % The phase correction reference handle will be used later in this
+    % script to apply phase correction.        
+    if(strcmp('.7', referenceData(end-1:end)))
+        % Reference pfile was provided, load that and compute coefficients
+        phaseCorrectionHandle = EpiComputeAndApplyPhaseCorrection(referenceData);    
+        
+        % Load pfile after loading and computing coefficients from ref pfile
+        pfileHandle = GERecon('Pfile.Load', pfileFullPath);
+        header = GERecon('Pfile.Header', pfileHandle);
+    else
+        % Load pfile before loading ref.dat
+        pfileHandle = GERecon('Pfile.Load', pfileFullPath);
+        header = GERecon('Pfile.Header', pfileHandle);
+        
+        % ref.dat was provided, load it
+        phaseCorrectionHandle = GERecon('Epi.LoadReference', referenceData);        
+    end
+            
+    %% Load VRGF interpolation kernels
+    % VRGF (variable readout gradient filtering) refers to sampling data on
+    % the gradient ramps during data acquisition. During recon, a sinc
+    % interpolation is performed to interpolate non-linearly sampled
+    % frequency data (i.e. data sampled on the gradient ramps) to linearly
+    % sampled frequency data.
+    % The sinc interpolation kernels that are used for each point in the 
+    % interpolated output are contained in a vrgf.dat or vrgf_kernels.dat
+    % file. The vrgf.dat file contains a full sinc function (i.e. sinc
+    % function length = readout direction acquisition size). The
+    % vrgf_kernels.dat file contains a truncated sinc interpolation kernel
+    % (i.e. sinc function length < readout direction acquisition size). 
+    % Either the full or truncated sinc functions may be used for recon. To
+    % match product functionality, use vrgf_kernels.dat for fMRI scans and
+    % vrgf.dat for all other scans.
+    vrgfHandle = GERecon('RampSampling.Load', vrgfInterpKernels);    
+    kernelMatrix = GERecon('RampSampling.KernelMatrix', vrgfHandle);
+    figure;
+    subplot(2,1,1);
+    imagesc(kernelMatrix);colormap(gray);colorbar;axis off;title('VRGF Interpolation Kernel Matrix');
+    subplot(2,1,2);
+    numRows = size(kernelMatrix, 1);
+    plot(kernelMatrix(numRows/4, :));title(['Sinc Interpolation Kernel for Interpolated Point: ' num2str(numRows/4) ' of ' num2str(numRows)]);
+    
+    %% Load Asset Calibration (if applicable)
+    % If the user specified an Asset calibration file and asset is enabled
+    % for this scan, read the asset calibration.
+    assetEnabled = (header.RawHeader.asset == 2 || header.RawHeader.asset == 7);
+    if((useAsset == 1) && assetEnabled)
+        GERecon('Asset.LoadCalibration', assetCalibration);    
+    end    
+    
+    %% Load rowflip.param (if applicable)
+    % If a rowflip filepath was specified, load the rowflip file. 
+    % The reference views acquired for use by dynamic
+    % phase correction are not flipped in the pfile. Image views are
+    % flipped in the pfile. Dynamic phase correction still works if the
+    % reference views are left un-flipped. The reference view flip is 
+    % included here for completeness.
+    pfilePath = fileparts(pfileFullPath);
+    rowFlipFilePath = fullfile(pfilePath, 'rowflip.param');
+    if(exist(rowFlipFilePath, 'file') == 2 && ~pfileHandle.areReferenceViewsFlipped)        
+        rowFlipHandle = GERecon('Epi.LoadRowFlip', rowFlipFilePath);
+        applyReferenceRowFlip = 1;
+    else
+        applyReferenceRowFlip = 0;
+    end
+        
+    %% Initialize workspace and header variables
+    % Pull values from the raw header and use these values to allocate
+    % space for intermediate data.
+    imageSize = header.RawHeader.im_size;
+    refViewsTop = header.RawHeader.extra_frames_top;
+    refViewsBottom = header.RawHeader.extra_frames_bot;
+    totalNumRefViews = refViewsTop + refViewsBottom;   
+    totalImageViews = header.RawHeader.da_yres - totalNumRefViews - 1;
+    
+    % Allocate intermediate data space
+    channelImages = single(zeros(imageSize, imageSize, pfileHandle.channels));    
+    finalImages = int16(zeros(imageSize, imageSize, pfileHandle.slices));        
+    rawImageViews = single(zeros(header.RawHeader.da_xres, totalImageViews, pfileHandle.channels));
+    rawReferenceViews = single(zeros(header.RawHeader.da_xres, totalNumRefViews, pfileHandle.channels));
+    
+    % Create figures and allocate dynamic coefficient space for visualizing
+    % dynamic phase correction coefficient changes over the course of a
+    % multi-phase scan
+    imagesFigureHandle = figure;
+    dynamicCoefficientsFigureHandle = figure;
+    updatedCoefficients = zeros(totalImageViews, pfileHandle.channels, 2);
+    constantDynamicCoefficients = zeros(pfileHandle.phases, 2);
+    linearDynamicCoefficients = zeros(pfileHandle.phases, 2);
+        
+    % Initialize image number to zero and begin looping over all phases 
+    % and slices in the scan
+    imageNumber = 0;     
+    for phase = 1:(pfileHandle.phases)
+        for slice = 1:(pfileHandle.slices)        
+            %% Extract Raw Data
+            % Dynamic phase correction works across all channels, thus 
+            % extract all channel data for the current slice (both 
+            % reference and image views) into rawImageViews and
+            % rawReferenceViews matrices.
+            for channel = 1:(pfileHandle.channels)
+                % Echo dimension is unused for baseic Epi scans
+                echo = 1;            
+                kSpace = GERecon('Pfile.KSpace', slice, echo, channel, phase);
+                corners = GERecon('Pfile.Corners', slice);
+                orientation = GERecon('Pfile.Orientation', slice);
+                
+                kSpaceTotalNumViews = size(kSpace,2);
+                rawImageViews(:,:,channel) = kSpace(:,(refViewsTop+1):(kSpaceTotalNumViews-refViewsBottom));
+                
+                if(refViewsTop > 0)
+                    refViews = kSpace(:,1:refViewsTop);
+                else
+                    refViews = kSpace(:,(kSpaceTotalNumViews-refViewsBottom+1):end);
+                end
+                
+                % Reference views are not flipped in a pfile while image
+                % views are flipped. Thus, flip reference views here
+                if(applyReferenceRowFlip == 1 && totalNumRefViews > 0)                    
+                    rowFlippedRefViews = GERecon('Epi.ApplyReferenceRowFlip', rowFlipHandle, refViews);                                
+                    rawReferenceViews(:,:,channel) = rowFlippedRefViews;
+                else
+                    rawReferenceViews(:,:,channel) = refViews; 
+                end
+            end
+            
+            %% Apply Phase Correction
+            % If reference views were acquired, apply dynamic phase 
+            % correction. If no reference views were acquired default to
+            % static phase correction using coefficients from the reference
+            % scan.
+            if(totalNumRefViews > 0)                
+                % To apply dynamic phase correction pass the current phase 
+                % correction handle and slice index along with the 
+                % rawImageViews and  rawReferenceViews matrices (for the 
+                % current slice) to the dynamic phase correction command. The 
+                % static coefficients for the current slice (computed during 
+                % reference scan recon) will be extracted from the phase 
+                % correction handle and updated based on the rawImageViews and
+                % rawReferenceViews.
+                % The first time that the dynamic phase correction command is
+                % called for each slice, the rawImageViews and
+                % rawReferenceViews that are provided will be cached as the
+                % baseline phase. All future calls to dynamic phase correction
+                % for the given slice will compare the rawImageViews and
+                % rawReferenceViews to the cached baseline phase to compute
+                % updated phase correction coefficients.
+                % The updated coefficients that are applied to the
+                % rawImageViews are optionally returned (if the user specifies
+                % a second return argument). Note that for product Epi scans
+                % with Asset, the same coefficients are applied to all channels
+                % of a given slice. For this case, the updated coefficients
+                % returned to the user have a channel dimension size of 1.                
+                [phaseCorrectedKSpace updatedCoefficients] = GERecon('Epi.ApplyDynamicPhaseCorrection', phaseCorrectionHandle, rawImageViews, rawReferenceViews, slice);   
+            else               
+                % Apply static phase correction for each channel based on
+                % the coefficients held in the phase correction handle
+                for channel = 1:pfileHandle.channels
+                    phaseCorrectedKSpace(:,:,channel) = GERecon('Epi.ApplyPhaseCorrection', phaseCorrectionHandle, rawImageViews(:,:,channel), slice, channel);
+                    currentChannelCoefs = GERecon('Epi.RetrieveCoefficients', phaseCorrectionHandle, slice, channel);
+                    updatedCoefficients(:,channel,:) = currentChannelCoefs;
+                end
+            end
+                 
+            %% Visualize dynamic coefficients
+            % Plot the phase correction coefficients applied for each
+            % phase. If dynamic phase correction is used, these
+            % coefficients will change with each phase of the scan. If
+            % dynamic phase correction is not used then these coefficients
+            % will remain constant throughout the scan.
+            % For demonstration purposes, plot the linear and constant
+            % coefficients for the two center views of slice index 0. Note
+            % that each view is shifted toward the center of kSpace. Thus,
+            % one view shifts left while an adjacent view shifts right. The
+            % shift is accomplished by applying a phase ramp along each
+            % readout in x,ky space and then transforming back to kx,ky
+            % space. Because each view shifts towards the center of kSpace,
+            % the signs on coefficients for adjacent views are negated.
+            % Dynamic phase correction is only supported for single shot
+            % Epi scans.                  
+            if(verboseFigures == 1 && (slice == floor(pfileHandle.slices / 2)))            
+                constantIndex = 1; % Constant coefficients are at third index 1 in the updatedCoefficients matrix
+                linearIndex = 2; % Linear coefficients are at third index 2 in the updatedCoefficients matrix
+                firstChannel = 1; % Only plot the first channel for visualization purposes
+                centerView = size(updatedCoefficients, 1) / 2; % Only plot the center view for visualization purposes
+                centerViewPlusOne = centerView + 1;
+                constantDynamicCoefficients(phase, 1) = updatedCoefficients(centerView, firstChannel, constantIndex);
+                linearDynamicCoefficients(phase, 1) = updatedCoefficients(centerView, firstChannel, linearIndex);
+                constantDynamicCoefficients(phase, 2) = updatedCoefficients(centerViewPlusOne, firstChannel, constantIndex);
+                linearDynamicCoefficients(phase, 2) = updatedCoefficients(centerViewPlusOne, firstChannel, linearIndex);                
+
+                figure(dynamicCoefficientsFigureHandle);
+                subplot(2,2,1);
+                plot(constantDynamicCoefficients(1:phase,1), '-o');title(['Constant Coefficients, View: ' num2str(centerView) ' (radians)']);xlabel('Phase Index');
+                subplot(2,2,2);
+                plot(constantDynamicCoefficients(1:phase,2), '-o');title(['Constant Coefficients, View: ' num2str(centerViewPlusOne) ' (radians)']);xlabel('Phase Index');
+                subplot(2,2,3);
+                plot(linearDynamicCoefficients(1:phase,1), '-o');title(['Linear Coefficients, View: ' num2str(centerView) ' (radians/pixel)']);xlabel('Phase Index');
+                subplot(2,2,4);
+                plot(linearDynamicCoefficients(1:phase,2), '-o');title(['Linear Coefficients, View: ' num2str(centerViewPlusOne) ' (radians/pixel)']);xlabel('Phase Index');
+                drawnow;
+            end            
+            
+            %% Sinc Interpolation for Ramp Sampled Data
+            for channel = 1:(pfileHandle.channels)               
+                % Interpolate ramp sampled data to linearly spaced samples
+                % in frequency space.
+                phaseCorrectedKSpaceCurrentChannel = phaseCorrectedKSpace(:,:,channel);
+                interpolatedData = GERecon('RampSampling.Interpolate', vrgfHandle, phaseCorrectedKSpaceCurrentChannel);
+
+                image = GERecon('Transform', interpolatedData);
+
+                % If ASSET and Homodyne are both enabled for this scan then 
+                % ASSET is run on both the high pass filtered and low pass 
+                % filtered images generated by the Homodyne algorithm. To 
+                % enable this use case, the Transform command returns the high 
+                % pass filtered and low pass filtered images in indices one and 
+                % two of the third dimension of the return image. For this 
+                % case, the channel images array must have space to store the
+                % additional high pass filtered / low pass filtered images. 
+                % Resize the channelImages matrix here to enable this use case.
+                % Note that this resize happens only once, the first time 
+                % through this loop.
+                if( (size(image,3) > 1) && (size(channelImages,4) == 1) )
+                    channelImages = single(zeros(size(channelImages,1), size(channelImages,2), size(channelImages,3), 2));
+                end                
+                
+                channelImages(:,:,channel,:) = image;
+            end
+
+            %% Channel combination
+            % Combine channel images using either Asset or a Sum of Squares
+            % channel combination.
+            if(useAsset)
+                channelCombinedImage = GERecon('Asset.Unalias', channelImages, corners);
+            else                
+                channelCombinedImage = GERecon('SumOfSquares', channelImages);
+            end            
+
+            %% Image Finalization
+            % Zero out kissoff views and apply gradwarp.
+            kissoffViews = header.RawHeader.kissoff_views;
+            channelCombinedImage(:,1:kissoffViews) = 0;
+            channelCombinedImage(:,(end-kissoffViews+1):end) = 0;
+            gradwarpImage = GERecon('Gradwarp', abs(channelCombinedImage), corners, 'XRMW');
+
+            % Apply final scaling for partial ky scans (this scaling
+            % matches product behavior)
+            if(header.RawHeader.hnover > 0)                
+                gradwarpImage = gradwarpImage * (256 / (header.RawHeader.rc_xres * header.RawHeader.rc_yres));
+            end
+                        
+            % Rotate/Transpose
+            rotatedTransposedSlice = GERecon('Orient', gradwarpImage, orientation);
+            
+            % Clip to range of shorts, convert to short, and write Dicom
+            % image
+            rotatedTransposedSlice(rotatedTransposedSlice < 0) = 0;
+            rotatedTransposedSlice(rotatedTransposedSlice > 32767) = 32767;
+            finalImages(:,:,slice) = int16(rotatedTransposedSlice);
+
+            if( verboseFigures == 1 || ( (phase == pfileHandle.phases) && (slice == pfileHandle.slices) ) )
+                figure(imagesFigureHandle);
+                imagesc(finalImages(:,:,slice));colormap(gray);colorbar;axis off;title(['Slice: ' num2str(slice) ' Phase: ' num2str(phase)]);
+                drawnow;
+            end
+            
+            if(imageNumber < 10)
+                imageNumberString = ['00' num2str(imageNumber)];
+            elseif(imageNumber < 100)
+                imageNumberString = ['0' num2str(imageNumber)];
+            else
+                imageNumberString = num2str(imageNumber);
+            end
+            
+            matlabDicomPath = fullfile(pfilePath, 'matlabDicoms', filesep);            
+            GERecon('Dicom.Write', [matlabDicomPath 'Image_' imageNumberString '.dcm'], finalImages(:,:,slice), imageNumber, orientation, corners, (header.SeriesData.se_no*100));
+            
+            imageNumber = imageNumber + 1;
+        end
+    end
+end
+
+
+##### SOURCE END #####
+--></body></html>

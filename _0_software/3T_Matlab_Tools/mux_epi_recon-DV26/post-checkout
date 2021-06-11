@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Hook script to record the hash of the last commit of the git repository 
+# in a file ('gitlasthash') upon running 'git checkout'.
+# 
+# 
+
+commit_hash=$(git rev-parse --verify HEAD)
+touch gitlasthash
+echo $commit_hash > gitlasthash

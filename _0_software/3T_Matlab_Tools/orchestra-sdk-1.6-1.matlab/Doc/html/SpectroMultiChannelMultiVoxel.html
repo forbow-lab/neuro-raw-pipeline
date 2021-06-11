@@ -1,0 +1,608 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>SpectroMultiChannelMultiVoxel</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-05-17"><meta name="DC.source" content="SpectroMultiChannelMultiVoxel.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">SpectroMultiChannelMultiVoxel</a></li><li><a href="#3">Load pfile</a></li><li><a href="#4">Load calibration</a></li><li><a href="#5">Channel by channel reconstruction</a></li><li><a href="#6">Read in multi-slice, multi-voxel data from pfile</a></li><li><a href="#7">Chop along x-direction</a></li><li><a href="#8">Baseline correction</a></li><li><a href="#9">Orient</a></li><li><a href="#10">Zerofill</a></li><li><a href="#11">Spectral transform</a></li><li><a href="#12">Spatial Transform</a></li><li><a href="#13">Individual Channel Plots</a></li><li><a href="#14">Accumulate data</a></li><li><a href="#16">Retrieve Accumulated Data</a></li><li><a href="#17">Postage Stamp Generation</a></li><li><a href="#19">PlotSquareCuboid</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [ postageStamps ] = SpectroMultiChannelMultiVoxel( pfileFullPath, calData )
+</pre><h2>SpectroMultiChannelMultiVoxel<a name="2"></a></h2><p>Copyright 2017 General Electric Company. All rights reserved. GE Proprietary and Confidential Information. Only to be distributed with permission from GE. Resulting outputs are not for diagnostic purposes.</p><p>Reconstruct multi-channel multi-voxel spectroscopy data. This script uses the GE product multi-coil combine algorithm. GE postage stamp pixel data will be generated and spectrums from each acquired voxel will be plotted.</p><h2>Load pfile<a name="3"></a></h2><p>Load pfile and hold on to the pfile directory. The pfile directory will be used to save postage stamp DICOM outputs.</p><pre class="codeinput">    [pfilePath] = fileparts(pfileFullPath);
+    pfileHandle = GERecon(<span class="string">'Pfile.Load'</span>, pfileFullPath);
+    header = GERecon(<span class="string">'Pfile.Header'</span>, pfileHandle);
+
+    <span class="comment">% Extract spectroscopy parameters from the pfile. These parameters</span>
+    <span class="comment">% include the excited voxel center and widths in RAS patient</span>
+    <span class="comment">% coordinates.</span>
+    params = GERecon(<span class="string">'Spectro.Mcsi.Parameters'</span>);
+</pre><h2>Load calibration<a name="4"></a></h2><p>If a calibration pfile is supplied, the calibration processing will be run on the pfile and the McsiCalibration file will be saved in the calibration pfile's directory. The McsiCalibration.h5 file will then be loaded from the calibration pfile directory.</p><pre class="codeinput">    <span class="keyword">if</span>(strcmp(<span class="string">'.7'</span>, calData(end-1:end)))
+        <span class="comment">% Calibraiton pfile was supplied</span>
+        <span class="comment">% Run calibration and read calibration from the cal pfile directory</span>
+        GERecon(<span class="string">'Calibration.Process'</span>, calData, <span class="string">'Standard'</span>);
+
+        [calPfilePath] = fileparts(calData);
+        calDataPath = fullfile(calPfilePath, filesep, <span class="string">'McsiCalibration.h5'</span>);
+
+        GERecon(<span class="string">'Spectro.Mcsi.LoadCalibration'</span>, calDataPath);
+    <span class="keyword">else</span>
+        GERecon(<span class="string">'Spectro.Mcsi.LoadCalibration'</span>, calData);
+    <span class="keyword">end</span>
+</pre><h2>Channel by channel reconstruction<a name="5"></a></h2><p>Allocate a matrix with space for the raw data for all slices and all spatial voxels for a single channel. The data will be processed channel by channel and accumulated into the GE multi-voxel multi-channel channel combiner.</p><pre class="codeinput">    singleChannelSortedFids = zeros(params.acquiredFidLength, params.acquiredXRes, params.acquiredYRes, params.acquiredZRes);
+
+    <span class="keyword">for</span> channel=1:pfileHandle.channels
+</pre><h2>Read in multi-slice, multi-voxel data from pfile<a name="6"></a></h2><p>Multi-Voxel spectroscopy data is stored in a pfile on a channel by channel basis using a flat view index. That is, the slice and echo dimensions remain constant. The view index is incremented with each acquired FID. Thus, to access the first acquired FID, use slice = 1, echo = 1, view = 1. To access the next acquired FID, use slice = 1, echo = 1, view = 2, and so on. Consider a hypothetical 3x4x3 multi-voxel scan (acquiredXRes = frequency res on UI = 3), (acquiredYRes = phase res on UI = 4), (acquiredZRes = num slices on UI = 3)</p><p>For 1-based indices: flatViewIndex = (xIndex-1) + (yIndex-1)*(acquiredXRes) +                 (slice-1)*(acquiredXRes*acquiredYRes) + 1</p><div><ul><li>Voxel Indices  ----------  Pfile Indices</li><li>x=1, y=1, z=1  ----------  slice=1, echo=1, view=1</li><li>x=2, y=1, z=1  ----------  slice=1, echo=1, view=2</li><li>x=3, y=1, z=1  ----------  slice=1, echo=1, view=3</li><li>x=1, y=2, z=1  ----------  slice=1, echo=1, view=4</li><li>x=2, y=2, z=1  ----------  slice=1, echo=1, view=5</li><li>x=3, y=2, z=1  ----------  slice=1, echo=1, view=6</li><li>x=1, y=3, z=1  ----------  slice=1, echo=1, view=7</li><li>...</li><li>x=1, y=4, z=3  ----------  slice=1, echo=1, view=34</li><li>x=2, y=4, z=3  ----------  slice=1, echo=1, view=35</li><li>x=3, y=4, z=3  ----------  slice=1, echo=1, view=36</li></ul></div><pre class="codeinput">        slice = 1;
+        echo = 1;
+        singleChannelAllFids = GERecon(<span class="string">'Pfile.KSpace'</span>, slice, echo, channel);
+        <span class="keyword">for</span> slice = 1:params.acquiredZRes
+            <span class="keyword">for</span> yIndex = 1:params.acquiredYRes
+                <span class="keyword">for</span> xIndex = 1:params.acquiredXRes
+                    flatViewIndex = (xIndex-1) + (yIndex-1)*(params.acquiredXRes) + (slice-1)*(params.acquiredXRes*params.acquiredYRes) + 1;
+
+                    <span class="comment">% Add one to flatViewIndex on this line to account for</span>
+                    <span class="comment">% 1-based indexing in Matlab</span>
+                    singleChannelSortedFids(:,xIndex,yIndex,slice) = singleChannelAllFids(:, flatViewIndex);
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+</pre><h2>Chop along x-direction<a name="7"></a></h2><p>chopX indicates to chop along x when it is true. This is a negated version of the PSD RHTYPCHP bit which indicates that rf chopping was turned on</p><pre class="codeinput">        <span class="keyword">if</span>(params.chopX)
+            singleChannelSortedFids(:,2:2:end,:,:) = singleChannelSortedFids(:,2:2:end,:,:) .* -1.0;
+        <span class="keyword">end</span>
+</pre><h2>Baseline correction<a name="8"></a></h2><p>Inspect the end of each FID to determine an average baseline offset. Subtract the average baseline offset from the raw acquired data.</p><pre class="codeinput">        singleChannelSortedFids = GERecon(<span class="string">'Spectro.Mcsi.BaselineCorrection'</span>, singleChannelSortedFids);
+</pre><h2>Orient<a name="9"></a></h2><p>Rotate/Transpose the data according to the slice orientation flags in the raw header for the pfile that is currently loaded.</p><pre class="codeinput">        orientedData = GERecon(<span class="string">'Spectro.Mcsi.Orient'</span>, singleChannelSortedFids);
+</pre><h2>Zerofill<a name="10"></a></h2><p>Zerofill data such that the spatial x/y dimensions have the same size and are equal to a power of 2. Example: An 8x10 acquisition will be zerofilled to 16x16 spatial voxels. The FID spectral dimension is also zerofilled to twice the acquired FID length.</p><pre class="codeinput">        zerofilledData = GERecon(<span class="string">'Spectro.Mcsi.Zerofill'</span>, orientedData);
+</pre><h2>Spectral transform<a name="11"></a></h2><p>Apply the spectral transform along the FID dimension of the zerofilled data. A spectral filter is applied along the FID dimension prior to transforming. The spectral filter can be obtained with the Spectro.Mcsi.SpectralFilter command.</p><pre class="codeinput">        <span class="keyword">if</span>(channel == 0)
+           <span class="comment">% Display filter the first time through this loop</span>
+           spectralFilter = GERecon(<span class="string">'Spectro.Mcsi.SpectralFilter'</span>);
+           figure;plot(spectralFilter);title(<span class="string">'Spectral Filter'</span>);drawnow;
+        <span class="keyword">end</span>
+        spectralTransformedData = GERecon(<span class="string">'Spectro.Mcsi.SpectralTransform'</span>, zerofilledData);
+</pre><h2>Spatial Transform<a name="12"></a></h2><p>Apply the spatial transform along the x,y,z spatial dimensions. Note that this function does not apply any spatial apodization filters.</p><pre class="codeinput">        transformedData = GERecon(<span class="string">'Spectro.Mcsi.SpatialTransform'</span>, spectralTransformedData);
+</pre><h2>Individual Channel Plots<a name="13"></a></h2><p>Plot intermediate data from 4.3ppm to -0.4ppm. Knowing that the water peak is at 4.7ppm, the scan's center frequency and the bandwidth of the acquisition, compute the indices to plot -0.4ppm to 4.3ppm.</p><pre class="codeinput">        <span class="comment">% The number of voxels in the x/y directions are equal at this</span>
+        <span class="comment">% point (because of the zerofilling step above). Thus, check only</span>
+        <span class="comment">% dimension index 2 to obtain the centerVoxelIndex</span>
+        centerVoxelIndex = size(spectralTransformedData,2) / 2;
+
+        <span class="keyword">if</span>(size(spectralTransformedData,4) == 1)
+           centerSliceIndex = 1;
+        <span class="keyword">else</span>
+           centerSliceIndex = size(spectralTransformedData,4) / 2;
+        <span class="keyword">end</span>
+
+        maxMagnitudeCenterVoxelCenterSlice = max(max(max(abs(transformedData(:,centerVoxelIndex,centerVoxelIndex,centerSliceIndex)))));
+        tolerance = 0.0001;
+        waterPeakIndex = find( abs(abs(transformedData(:,centerVoxelIndex,centerVoxelIndex,centerSliceIndex)) - maxMagnitudeCenterVoxelCenterSlice) &lt; tolerance );
+
+        <span class="comment">% Assume water is the largest peak and is at 4.7ppm. A shift of</span>
+        <span class="comment">% 0.4ppm towards zero gets to 4.3ppm (the edge of the region that</span>
+        <span class="comment">% will be plotted).</span>
+        zeroPointFourPpmShiftInHzFromWater = params.centerFrequencyMHz * 0.4;
+
+        <span class="comment">% 5.1ppm shift from water gets from 4.7ppm to -0.4ppm</span>
+        fivePointOnePpmShiftInHzFromWater = params.centerFrequencyMHz * 5.1;
+
+        pointsPerHz = size(transformedData,1) / params.spectralBandwidthHz;
+        startingPoint = ceil(waterPeakIndex + zeroPointFourPpmShiftInHzFromWater * pointsPerHz);
+        endingPoint = ceil(waterPeakIndex + fivePointOnePpmShiftInHzFromWater * pointsPerHz);
+
+        PlotSquareCuboid(real(transformedData(startingPoint:endingPoint,:,:,centerSliceIndex)), <span class="string">'Channel Data'</span>, 1);
+</pre><h2>Accumulate data<a name="14"></a></h2><p>Accumulate data using the GE multi-channel combine algorithm. Note that this algorithm is specifically designed to be used with the product pulse sequence and processing steps above. This algorithm will extract a subset of the spectrum to work with. The algorithm is not compatible with 7.0T scans. Part of the processing done in this function is to transform back to kz and adjust the z-transform such that it yields slices at slice locations with the same spacing as the localizer scan. This is accomplished by adding a conversion factor to the exponent of the Fourier transform. The conversion factor is stored in rhuser48 and equals:</p><p><img src="SpectroMultiChannelMultiVoxel_eq99933.png" alt="$$rhuser48=\frac{(LocalizerSliceThickness + SliceSpacing)}{(CSISliceThickness)}$$"></p><p>Transform with conversion factor:</p><p><img src="SpectroMultiChannelMultiVoxel_eq94925.png" alt="$$f(n)=\sum\limits_{k=0}^{n-1}F(k)e^{-i\frac{2\pi}{N}kn(rhuser48)}$$"></p><p>Using the z-transform above results in each transform location 'n' being spaced by (LocalizerSliceThickness + SliceSpacing). The number of output slices can be obtained from the pfile's sliceCount.</p><pre class="codeinput">        GERecon(<span class="string">'Spectro.Mcsi.Accumulate'</span>, transformedData, channel);
+</pre><pre class="codeinput">    <span class="keyword">end</span>
+</pre><h2>Retrieve Accumulated Data<a name="16"></a></h2><p>Retrieve the processed and accumulated data. The data returned here will be a 256 point spectrum from ~ -0.4ppm to 4.3ppm. The ppm range returned for plotting by GE multi-channel accumulation function is not customizable at this time.</p><pre class="codeinput">    accumulatedData = GERecon(<span class="string">'Spectro.Mcsi.AccumulatedData'</span>);
+</pre><h2>Postage Stamp Generation<a name="17"></a></h2><p>Determine the number of reconstructed slices to make a postage stamp for. The number of reconstructed slices is not equal to the number of acquired slices because of the z-transform adjustment described above. The slice dimension of the accumulated data is the fourth dimension (SpectralDimension x X x Y x Slice). Postage stamps are a 2D representation of spectral data for multiple voxels of a single slice. A postage stamp always consists of a 16 x 16 grid of squares. Each square contains one point of a 256 point spectrum for each spatial voxel in the slice. Thus, for an 8x8 set of spatial locations, each of the 16 squares has a size of 8x8. The resulting image size is 16*8 x 16*8 = 128x128. For a 16x16 set of spatial locations the resulting image size is 16*16 x 16*16 = 256x256.</p><pre class="codeinput">    numReconStructedSlices = size(accumulatedData, 4);
+
+    matlabDicomPath = fullfile(pfilePath, <span class="string">'matlabDicoms'</span>, filesep);
+    imageNumber = 0;
+    <span class="keyword">for</span> slice = 1:numReconStructedSlices
+        sliceString = [<span class="string">'Slice '</span> num2str(slice)];
+
+        PlotSquareCuboid(imag(accumulatedData(:,:,:,slice)), [sliceString <span class="string">' Imaginary Data'</span>]);drawnow;
+        PlotSquareCuboid(real(accumulatedData(:,:,:,slice)), [sliceString <span class="string">' Real Data'</span>]);drawnow;
+
+        orientation = GERecon(<span class="string">'Pfile.Orientation'</span>, slice);
+        corners = GERecon(<span class="string">'Pfile.Corners'</span>, slice);
+
+        realImage = GERecon(<span class="string">'Spectro.Mcsi.GeneratePostageStamp'</span>, real(accumulatedData(:,:,:,slice)));
+        <span class="keyword">if</span>(imageNumber &lt; 10)
+            imageNumberString = [<span class="string">'00'</span> num2str(imageNumber)];
+        <span class="keyword">elseif</span>(imageNumber &lt; 100)
+            imageNumberString = [<span class="string">'0'</span> num2str(imageNumber)];
+        <span class="keyword">else</span>
+            imageNumberString = num2str(imageNumber);
+        <span class="keyword">end</span>
+        GERecon(<span class="string">'Dicom.Write'</span>, [matlabDicomPath <span class="string">'Image_'</span> imageNumberString <span class="string">'.dcm'</span>], realImage, imageNumber, orientation, corners, (header.SeriesData.se_no*100));
+        imageNumber = imageNumber + 1;
+        postageStamps(:,:,imageNumber) = realImage;
+
+        imaginaryImage = GERecon(<span class="string">'Spectro.Mcsi.GeneratePostageStamp'</span>, imag(accumulatedData(:,:,:,slice)));
+        <span class="keyword">if</span>(imageNumber &lt; 10)
+            imageNumberString = [<span class="string">'00'</span> num2str(imageNumber)];
+        <span class="keyword">elseif</span>(imageNumber &lt; 100)
+            imageNumberString = [<span class="string">'0'</span> num2str(imageNumber)];
+        <span class="keyword">else</span>
+            imageNumberString = num2str(imageNumber);
+        <span class="keyword">end</span>
+        GERecon(<span class="string">'Dicom.Write'</span>, [matlabDicomPath <span class="string">'Image_'</span> imageNumberString <span class="string">'.dcm'</span>], imaginaryImage, imageNumber, orientation, corners, (header.SeriesData.se_no*100));
+        imageNumber = imageNumber + 1;
+        postageStamps(:,:,imageNumber) = imaginaryImage;
+    <span class="keyword">end</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
+
+<span class="keyword">function</span> PlotSquareCuboid( squareCuboidInput, figureWindowTitle, localScale)
+</pre><h2>PlotSquareCuboid<a name="19"></a></h2><p>Plot the spectrums in the given cuboid (Spectrum x X x Y) to a 2D figure window. This function creates a set of MATLAB axes handles up front and then plots a spectrum in each axes. The third parameter is optional and specified whether the scale of each individual plot is scaled based on all voxels or only the data in a single voxel/individual plot. The default is to apply a global scale (localScale == 0) such that all plots are scaled uniformly</p><pre class="codeinput">    <span class="keyword">if</span>(size(squareCuboidInput, 2) ~= size(squareCuboidInput, 3))
+       disp(<span class="string">'Size mismatch, cuboid must be square!'</span>);
+       <span class="keyword">return</span>;
+    <span class="keyword">end</span>
+
+    figure(<span class="string">'name'</span>, figureWindowTitle);
+
+    <span class="comment">% Input data is expected to be square. Thus, obtain the num voxels in</span>
+    <span class="comment">% each direction of the cuboid from the size of the second dimension.</span>
+    numVoxelsInOneDirection = size(squareCuboidInput, 2);
+
+    <span class="comment">% Initialize a set of axes objects (one for each spectrum to be</span>
+    <span class="comment">% plotted).</span>
+    axesIndex = 1;
+    <span class="keyword">for</span> i=1:numVoxelsInOneDirection
+      xAxesLocation = (i-1)/numVoxelsInOneDirection;
+      <span class="keyword">for</span> j=1:numVoxelsInOneDirection
+        yAxesLocation = (j-1)/numVoxelsInOneDirection;
+
+        <span class="comment">% Set units to normalized which maps the lower left corner of the</span>
+        <span class="comment">% figure window to 0,0 and the upper right to 1,1</span>
+        <span class="comment">% Then, set the position in the current window to the given x,y</span>
+        <span class="comment">% location and set the width/height to 1/numVoxelsInOneDirection</span>
+        squareHeightWidth = 1.0/numVoxelsInOneDirection;
+        axesCollection(axesIndex) = axes(<span class="string">'units'</span>,<span class="string">'norm'</span>,<span class="string">'pos'</span>,[xAxesLocation yAxesLocation squareHeightWidth squareHeightWidth]);
+        axesIndex = axesIndex + 1;
+      <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% Remove tick labels and set next plot to be added to the current</span>
+    <span class="comment">% figure handle;</span>
+    set(axesCollection,<span class="string">'XtickLabel'</span>,<span class="string">''</span>,<span class="string">'YTickLabel'</span>,<span class="string">''</span>,<span class="string">'nextplot'</span>,<span class="string">'add'</span>);
+
+    <span class="comment">% Determine global min/max values for this slice. Scale all spectrums</span>
+    <span class="comment">% to this global min/max.</span>
+    minVal = min(min(min(squareCuboidInput)));
+    maxVal = max(max(max(squareCuboidInput)));
+
+    <span class="keyword">if</span>(nargin &lt; 3)
+       localScale = 0;
+    <span class="keyword">end</span>
+
+    <span class="comment">% Postage stamps are oriented for display in FuncTool. Match FuncTool</span>
+    <span class="comment">% display to the display generated with this code.</span>
+    i = 1;
+    <span class="keyword">for</span> y=1:numVoxelsInOneDirection
+        <span class="keyword">for</span> x=numVoxelsInOneDirection:-1:1
+            kk = i;
+
+            plot(squareCuboidInput(:,y,x),<span class="string">'parent'</span>,axesCollection(kk));
+
+            xlim(axesCollection(kk), [1 size(squareCuboidInput,1)]);
+
+            <span class="keyword">if</span>(localScale &gt; 0)
+                <span class="comment">% Reset max/min values to the max/min from just this</span>
+                <span class="comment">% spatial location</span>
+                minVal = min(min(min(squareCuboidInput(:,y,x))));
+                maxVal = max(max(max(squareCuboidInput(:,y,x))));
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span>(minVal &lt; maxVal)
+                ylim(axesCollection(kk), [minVal maxVal]);
+            <span class="keyword">else</span>
+                ylim(axesCollection(kk), [-2000 2000]);
+            <span class="keyword">end</span>
+
+            i = i + 1;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="SpectroMultiChannelMultiVoxel_01.png" alt=""> <img vspace="5" hspace="5" src="SpectroMultiChannelMultiVoxel_02.png" alt=""> <img vspace="5" hspace="5" src="SpectroMultiChannelMultiVoxel_03.png" alt=""> <img vspace="5" hspace="5" src="SpectroMultiChannelMultiVoxel_04.png" alt=""> <img vspace="5" hspace="5" src="SpectroMultiChannelMultiVoxel_05.png" alt=""> <img vspace="5" hspace="5" src="SpectroMultiChannelMultiVoxel_06.png" alt=""> <img vspace="5" hspace="5" src="SpectroMultiChannelMultiVoxel_07.png" alt=""> <img vspace="5" hspace="5" src="SpectroMultiChannelMultiVoxel_08.png" alt=""> <img vspace="5" hspace="5" src="SpectroMultiChannelMultiVoxel_09.png" alt=""> <img vspace="5" hspace="5" src="SpectroMultiChannelMultiVoxel_10.png" alt=""> <pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [ postageStamps ] = SpectroMultiChannelMultiVoxel( pfileFullPath, calData )
+%% SpectroMultiChannelMultiVoxel
+%
+% Copyright 2017 General Electric Company. All rights reserved.
+% GE Proprietary and Confidential Information. Only to be distributed with
+% permission from GE. Resulting outputs are not for diagnostic purposes.
+%
+% Reconstruct multi-channel multi-voxel spectroscopy data. This script uses
+% the GE product multi-coil combine algorithm. GE postage stamp pixel data
+% will be generated and spectrums from each acquired voxel will be plotted.
+%
+
+
+    %% Load pfile
+    % Load pfile and hold on to the pfile directory. The pfile directory
+    % will be used to save postage stamp DICOM outputs.
+    [pfilePath] = fileparts(pfileFullPath);
+    pfileHandle = GERecon('Pfile.Load', pfileFullPath);
+    header = GERecon('Pfile.Header', pfileHandle);
+    
+    % Extract spectroscopy parameters from the pfile. These parameters
+    % include the excited voxel center and widths in RAS patient
+    % coordinates.
+    params = GERecon('Spectro.Mcsi.Parameters');        
+            
+    %% Load calibration
+    % If a calibration pfile is supplied, the calibration processing will
+    % be run on the pfile and the McsiCalibration file will be saved in the
+    % calibration pfile's directory. The McsiCalibration.h5 file will then
+    % be loaded from the calibration pfile directory.
+    if(strcmp('.7', calData(end-1:end)))
+        % Calibraiton pfile was supplied
+        % Run calibration and read calibration from the cal pfile directory
+        GERecon('Calibration.Process', calData, 'Standard');
+        
+        [calPfilePath] = fileparts(calData);
+        calDataPath = fullfile(calPfilePath, filesep, 'McsiCalibration.h5');                    
+        
+        GERecon('Spectro.Mcsi.LoadCalibration', calDataPath); 
+    else
+        GERecon('Spectro.Mcsi.LoadCalibration', calData); 
+    end    
+    
+    %% Channel by channel reconstruction
+    % Allocate a matrix with space for the raw data for all slices and all
+    % spatial voxels for a single channel. The data will be processed
+    % channel by channel and accumulated into the GE multi-voxel
+    % multi-channel channel combiner.
+    singleChannelSortedFids = zeros(params.acquiredFidLength, params.acquiredXRes, params.acquiredYRes, params.acquiredZRes);    
+    
+    for channel=1:pfileHandle.channels
+        %% Read in multi-slice, multi-voxel data from pfile
+        % Multi-Voxel spectroscopy data is stored in a pfile on a 
+        % channel by channel basis using a flat view index. That is, 
+        % the slice and echo dimensions remain constant. The view 
+        % index is incremented with each acquired FID. Thus, to access 
+        % the first acquired FID, use slice = 1, echo = 1, view = 1. 
+        % To access the next acquired FID, use 
+        % slice = 1, echo = 1, view = 2, and so on.
+        % Consider a hypothetical 3x4x3 multi-voxel scan
+        % (acquiredXRes = frequency res on UI = 3), (acquiredYRes =
+        % phase res on UI = 4), (acquiredZRes = num slices on UI =
+        % 3)
+        %
+        % For 1-based indices:
+        % flatViewIndex = (xIndex-1) + (yIndex-1)*(acquiredXRes) + 
+        %                 (slice-1)*(acquiredXRes*acquiredYRes) + 1
+        %
+        % * Voxel Indices  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  Pfile Indices
+        % * x=1, y=1, z=1  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  slice=1, echo=1, view=1
+        % * x=2, y=1, z=1  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  slice=1, echo=1, view=2
+        % * x=3, y=1, z=1  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  slice=1, echo=1, view=3
+        % * x=1, y=2, z=1  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  slice=1, echo=1, view=4
+        % * x=2, y=2, z=1  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  slice=1, echo=1, view=5
+        % * x=3, y=2, z=1  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  slice=1, echo=1, view=6
+        % * x=1, y=3, z=1  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  slice=1, echo=1, view=7
+        % * ...
+        % * x=1, y=4, z=3  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  slice=1, echo=1, view=34
+        % * x=2, y=4, z=3  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  slice=1, echo=1, view=35
+        % * x=3, y=4, z=3  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  slice=1, echo=1, view=36
+        %     
+        slice = 1;
+        echo = 1;
+        singleChannelAllFids = GERecon('Pfile.KSpace', slice, echo, channel);    
+        for slice = 1:params.acquiredZRes
+            for yIndex = 1:params.acquiredYRes
+                for xIndex = 1:params.acquiredXRes
+                    flatViewIndex = (xIndex-1) + (yIndex-1)*(params.acquiredXRes) + (slice-1)*(params.acquiredXRes*params.acquiredYRes) + 1;
+
+                    % Add one to flatViewIndex on this line to account for
+                    % 1-based indexing in Matlab
+                    singleChannelSortedFids(:,xIndex,yIndex,slice) = singleChannelAllFids(:, flatViewIndex);                
+                end
+            end
+        end
+
+        %% Chop along x-direction
+        % chopX indicates to chop along x when it is true.
+        % This is a negated version of the PSD RHTYPCHP bit which
+        % indicates that rf chopping was turned on
+        if(params.chopX)
+            singleChannelSortedFids(:,2:2:end,:,:) = singleChannelSortedFids(:,2:2:end,:,:) .* -1.0;
+        end
+        
+        %% Baseline correction
+        % Inspect the end of each FID to determine an average baseline
+        % offset. Subtract the average baseline offset from the raw
+        % acquired data.
+        singleChannelSortedFids = GERecon('Spectro.Mcsi.BaselineCorrection', singleChannelSortedFids);
+        
+        %% Orient
+        % Rotate/Transpose the data according to the slice orientation
+        % flags in the raw header for the pfile that is currently loaded.
+        orientedData = GERecon('Spectro.Mcsi.Orient', singleChannelSortedFids);
+       
+        %% Zerofill
+        % Zerofill data such that the spatial x/y dimensions have the 
+        % same size and are equal to a power of 2. Example: An 8x10 
+        % acquisition will be zerofilled to 16x16 spatial voxels. The FID 
+        % spectral dimension is also zerofilled to twice the acquired 
+        % FID length.
+        zerofilledData = GERecon('Spectro.Mcsi.Zerofill', orientedData);
+        
+        %% Spectral transform 
+        % Apply the spectral transform along the FID dimension of the
+        % zerofilled data. A spectral filter is applied along
+        % the FID dimension prior to transforming. The spectral filter can
+        % be obtained with the Spectro.Mcsi.SpectralFilter command.
+        if(channel == 0)
+           % Display filter the first time through this loop
+           spectralFilter = GERecon('Spectro.Mcsi.SpectralFilter');
+           figure;plot(spectralFilter);title('Spectral Filter');drawnow;
+        end
+        spectralTransformedData = GERecon('Spectro.Mcsi.SpectralTransform', zerofilledData);
+        
+        %% Spatial Transform
+        % Apply the spatial transform along the x,y,z spatial dimensions.
+        % Note that this function does not apply any spatial apodization
+        % filters.
+        transformedData = GERecon('Spectro.Mcsi.SpatialTransform', spectralTransformedData);
+               
+        %% Individual Channel Plots
+        % Plot intermediate data from 4.3ppm to -0.4ppm. Knowing that the
+        % water peak is at 4.7ppm, the scan's center frequency
+        % and the bandwidth of the acquisition, compute the indices to plot
+        % -0.4ppm to 4.3ppm.
+        
+        % The number of voxels in the x/y directions are equal at this
+        % point (because of the zerofilling step above). Thus, check only
+        % dimension index 2 to obtain the centerVoxelIndex
+        centerVoxelIndex = size(spectralTransformedData,2) / 2;
+        
+        if(size(spectralTransformedData,4) == 1)
+           centerSliceIndex = 1; 
+        else
+           centerSliceIndex = size(spectralTransformedData,4) / 2; 
+        end
+        
+        maxMagnitudeCenterVoxelCenterSlice = max(max(max(abs(transformedData(:,centerVoxelIndex,centerVoxelIndex,centerSliceIndex)))));
+        tolerance = 0.0001;
+        waterPeakIndex = find( abs(abs(transformedData(:,centerVoxelIndex,centerVoxelIndex,centerSliceIndex)) - maxMagnitudeCenterVoxelCenterSlice) < tolerance );        
+                
+        % Assume water is the largest peak and is at 4.7ppm. A shift of
+        % 0.4ppm towards zero gets to 4.3ppm (the edge of the region that
+        % will be plotted).
+        zeroPointFourPpmShiftInHzFromWater = params.centerFrequencyMHz * 0.4;
+        
+        % 5.1ppm shift from water gets from 4.7ppm to -0.4ppm
+        fivePointOnePpmShiftInHzFromWater = params.centerFrequencyMHz * 5.1;
+        
+        pointsPerHz = size(transformedData,1) / params.spectralBandwidthHz;
+        startingPoint = ceil(waterPeakIndex + zeroPointFourPpmShiftInHzFromWater * pointsPerHz);
+        endingPoint = ceil(waterPeakIndex + fivePointOnePpmShiftInHzFromWater * pointsPerHz);
+        
+        PlotSquareCuboid(real(transformedData(startingPoint:endingPoint,:,:,centerSliceIndex)), 'Channel Data', 1);                
+        
+        %% Accumulate data
+        % Accumulate data using the GE multi-channel combine algorithm.
+        % Note that this algorithm is specifically designed to be used 
+        % with the product pulse sequence and processing steps above. This
+        % algorithm will extract a subset of the spectrum to work with. The
+        % algorithm is not compatible with 7.0T scans.
+        % Part of the processing done in this function is to transform back
+        % to kz and adjust the z-transform such that it yields slices at
+        % slice locations with the same spacing as the localizer scan. This
+        % is accomplished by adding a conversion factor to the exponent of
+        % the Fourier transform. The conversion factor is stored in
+        % rhuser48 and equals:
+        %
+        % $$rhuser48=\frac{(LocalizerSliceThickness + SliceSpacing)}{(CSISliceThickness)}$$
+        %
+        % Transform with conversion factor:
+        %
+        % $$f(n)=\sum\limits_{k=0}^{n-1}F(k)e^{-i\frac{2\pi}{N}kn(rhuser48)}$$
+        %
+        % Using the z-transform above results in each transform location
+        % 'n' being spaced by (LocalizerSliceThickness + SliceSpacing). The
+        % number of output slices can be obtained from the pfile's
+        % sliceCount.
+        GERecon('Spectro.Mcsi.Accumulate', transformedData, channel);
+    end
+    
+    %% Retrieve Accumulated Data
+    % Retrieve the processed and accumulated data. The data returned here
+    % will be a 256 point spectrum from ~ -0.4ppm to 4.3ppm. The ppm range
+    % returned for plotting by GE multi-channel accumulation function is
+    % not customizable at this time.
+    accumulatedData = GERecon('Spectro.Mcsi.AccumulatedData');   
+        
+    %% Postage Stamp Generation    
+    % Determine the number of reconstructed slices to make a postage stamp
+    % for. The number of reconstructed slices is not equal to the number of
+    % acquired slices because of the z-transform adjustment described
+    % above. The slice dimension of the accumulated data is the fourth
+    % dimension (SpectralDimension x X x Y x Slice).
+    % Postage stamps are a 2D representation of spectral data for multiple
+    % voxels of a single slice. A postage stamp always consists of a 16 x
+    % 16 grid of squares. Each square contains one point of a 256 point
+    % spectrum for each spatial voxel in the slice. Thus, for an 8x8 set of
+    % spatial locations, each of the 16 squares has a size of 8x8. The
+    % resulting image size is 16*8 x 16*8 = 128x128. For a 16x16 set of
+    % spatial locations the resulting image size is 16*16 x 16*16 =
+    % 256x256.     
+    numReconStructedSlices = size(accumulatedData, 4);
+       
+    matlabDicomPath = fullfile(pfilePath, 'matlabDicoms', filesep);    
+    imageNumber = 0;
+    for slice = 1:numReconStructedSlices
+        sliceString = ['Slice ' num2str(slice)];
+        
+        PlotSquareCuboid(imag(accumulatedData(:,:,:,slice)), [sliceString ' Imaginary Data']);drawnow;
+        PlotSquareCuboid(real(accumulatedData(:,:,:,slice)), [sliceString ' Real Data']);drawnow;
+                
+        orientation = GERecon('Pfile.Orientation', slice);                    
+        corners = GERecon('Pfile.Corners', slice);
+                
+        realImage = GERecon('Spectro.Mcsi.GeneratePostageStamp', real(accumulatedData(:,:,:,slice)));
+        if(imageNumber < 10)
+            imageNumberString = ['00' num2str(imageNumber)];
+        elseif(imageNumber < 100)
+            imageNumberString = ['0' num2str(imageNumber)];
+        else
+            imageNumberString = num2str(imageNumber);
+        end                
+        GERecon('Dicom.Write', [matlabDicomPath 'Image_' imageNumberString '.dcm'], realImage, imageNumber, orientation, corners, (header.SeriesData.se_no*100));                        
+        imageNumber = imageNumber + 1;
+        postageStamps(:,:,imageNumber) = realImage;
+        
+        imaginaryImage = GERecon('Spectro.Mcsi.GeneratePostageStamp', imag(accumulatedData(:,:,:,slice)));
+        if(imageNumber < 10)
+            imageNumberString = ['00' num2str(imageNumber)];
+        elseif(imageNumber < 100)
+            imageNumberString = ['0' num2str(imageNumber)];
+        else
+            imageNumberString = num2str(imageNumber);
+        end            
+        GERecon('Dicom.Write', [matlabDicomPath 'Image_' imageNumberString '.dcm'], imaginaryImage, imageNumber, orientation, corners, (header.SeriesData.se_no*100));        
+        imageNumber = imageNumber + 1;
+        postageStamps(:,:,imageNumber) = imaginaryImage;
+    end
+end
+
+function PlotSquareCuboid( squareCuboidInput, figureWindowTitle, localScale)
+%% PlotSquareCuboid
+% Plot the spectrums in the given cuboid (Spectrum x X x Y) to a 2D figure
+% window. This function creates a set of MATLAB axes handles up front and
+% then plots a spectrum in each axes. The third parameter is optional and
+% specified whether the scale of each individual plot is scaled based on all
+% voxels or only the data in a single voxel/individual plot. The default is
+% to apply a global scale (localScale == 0) such that all plots are scaled
+% uniformly
+    
+    if(size(squareCuboidInput, 2) ~= size(squareCuboidInput, 3))
+       disp('Size mismatch, cuboid must be square!');
+       return;
+    end
+    
+    figure('name', figureWindowTitle);
+
+    % Input data is expected to be square. Thus, obtain the num voxels in
+    % each direction of the cuboid from the size of the second dimension.
+    numVoxelsInOneDirection = size(squareCuboidInput, 2);    
+                
+    % Initialize a set of axes objects (one for each spectrum to be
+    % plotted).
+    axesIndex = 1;
+    for i=1:numVoxelsInOneDirection
+      xAxesLocation = (i-1)/numVoxelsInOneDirection;
+      for j=1:numVoxelsInOneDirection
+        yAxesLocation = (j-1)/numVoxelsInOneDirection;
+        
+        % Set units to normalized which maps the lower left corner of the
+        % figure window to 0,0 and the upper right to 1,1
+        % Then, set the position in the current window to the given x,y
+        % location and set the width/height to 1/numVoxelsInOneDirection 
+        squareHeightWidth = 1.0/numVoxelsInOneDirection;
+        axesCollection(axesIndex) = axes('units','norm','pos',[xAxesLocation yAxesLocation squareHeightWidth squareHeightWidth]);
+        axesIndex = axesIndex + 1;
+      end
+    end
+    
+    % Remove tick labels and set next plot to be added to the current
+    % figure handle;
+    set(axesCollection,'XtickLabel','','YTickLabel','','nextplot','add');    
+    
+    % Determine global min/max values for this slice. Scale all spectrums
+    % to this global min/max.
+    minVal = min(min(min(squareCuboidInput)));
+    maxVal = max(max(max(squareCuboidInput)));
+    
+    if(nargin < 3)
+       localScale = 0; 
+    end
+    
+    % Postage stamps are oriented for display in FuncTool. Match FuncTool
+    % display to the display generated with this code.    
+    i = 1;
+    for y=1:numVoxelsInOneDirection
+        for x=numVoxelsInOneDirection:-1:1
+            kk = i;       
+            
+            plot(squareCuboidInput(:,y,x),'parent',axesCollection(kk));            
+            
+            xlim(axesCollection(kk), [1 size(squareCuboidInput,1)]);        
+            
+            if(localScale > 0)
+                % Reset max/min values to the max/min from just this
+                % spatial location
+                minVal = min(min(min(squareCuboidInput(:,y,x))));
+                maxVal = max(max(max(squareCuboidInput(:,y,x))));                        
+            end
+            
+            if(minVal < maxVal)              
+                ylim(axesCollection(kk), [minVal maxVal]);
+            else
+                ylim(axesCollection(kk), [-2000 2000]);                                   
+            end
+            
+            i = i + 1;            
+        end
+    end
+end
+
+
+##### SOURCE END #####
+--></body></html>

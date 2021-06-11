@@ -1,0 +1,237 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>EpiComputeAndApplyPhaseCorrection</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-05-17"><meta name="DC.source" content="EpiComputeAndApplyPhaseCorrection.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">EpiComputeAndApplyPhaseCorrection</a></li><li><a href="#3">Load</a></li><li><a href="#4">Account for reference views</a></li><li><a href="#5">Compute coefficients</a></li><li><a href="#6">Apply Coefficients</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [ phaseCorrectionHandle ] = EpiComputeAndApplyPhaseCorrection( referencePfile )
+</pre><h2>EpiComputeAndApplyPhaseCorrection<a name="2"></a></h2><p>Copyright 2017 General Electric Company. All rights reserved. GE Proprietary and Confidential Information. Only to be distributed with permission from GE. Resulting outputs are not for diagnostic purposes.</p><pre>  phaseCorrectionHandle = EpiComputeAndApplyPhaseCorrection('Prrrrr.7');
+  Given the reference pfile 'Prrrrr.7', run reference scan
+  reconstruction processing to compute phase correction coefficients.
+  The computed coefficients are applied to the raw reference scan data
+  to demonstrate that applying a phase ramp in x,ky space with the
+  computed linear and constant coefficients shifts and lines up the
+  kx,ky reference scan data.
+  A handle to the computed coefficients is returned. The handle can be
+  used with the GERecon function to apply the coefficients to raw data.</pre><h2>Load<a name="3"></a></h2><p>Load a reference scan pfile and initialize an empty phase correction reference handle. The phase correction reference handle will be filled with coefficients and returned to the caller. The filled handle can be used to apply phase correction using the computed coefficients.</p><pre class="codeinput">    pfileHandle = GERecon(<span class="string">'Pfile.Load'</span>, referencePfile);
+    phaseCorrectionHandle = GERecon(<span class="string">'Epi.LoadReference'</span>);
+</pre><h2>Account for reference views<a name="4"></a></h2><p>Some multi-phase EPI scans acquire additional non-phase-encoded views at the top or bottom of the EPI echo train. These views are not needed for reference scan processing. This code determines the number of additional reference views acquired with the reference scan data so they can be discarded when the data is processed.</p><pre class="codeinput">    header = GERecon(<span class="string">'Pfile.Header'</span>);
+    refViewsTop = header.RawHeader.extra_frames_top;
+    refViewsBottom = header.RawHeader.extra_frames_bot;
+</pre><h2>Compute coefficients<a name="5"></a></h2><p>Compute linear and constant phase correction coefficients from reference scan data. As stated previously, if additional non-phase-encoded reference views are acquired then discard those views here.</p><pre class="codeinput">    coefficientsFigureHandle = figure;
+    <span class="keyword">for</span> slice = 1:pfileHandle.slices
+        <span class="keyword">for</span> channel = 1:pfileHandle.channels
+            <span class="comment">% Echo dimension is unused for baseic Epi scans</span>
+            echo = 1;
+            kSpace = GERecon(<span class="string">'Pfile.KSpace'</span>, slice, echo, channel);
+
+            <span class="comment">% Account for additional reference views that may be</span>
+            <span class="comment">% acquired with multi-phase scans</span>
+            kSpaceTotalNumViews = size(kSpace,2);
+            kSpaceWithoutRefViews = kSpace(:,(refViewsTop+1):(kSpaceTotalNumViews-refViewsBottom));
+
+            <span class="comment">% Compute phase correction coefficients, store in reference</span>
+            <span class="comment">% handle, and plot coefficients</span>
+            computedCoefficients = GERecon(<span class="string">'Epi.ComputeCoefficients'</span>, phaseCorrectionHandle, kSpaceWithoutRefViews, slice, channel);
+            figure(coefficientsFigureHandle);
+            subplot(2,1,1,<span class="string">'replace'</span>);
+            plot(computedCoefficients(:,1));title([<span class="string">'Constant Coefficients - Slice: '</span> num2str(slice) <span class="string">', Channel: '</span> num2str(channel)]);
+            subplot(2,1,2,<span class="string">'replace'</span>);
+            plot(computedCoefficients(:,2));title([<span class="string">'Linear Coefficients - Slice: '</span> num2str(slice) <span class="string">', Channel: '</span> num2str(channel)]);
+            drawnow;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="EpiComputeAndApplyPhaseCorrection_01.png" alt=""> <h2>Apply Coefficients<a name="6"></a></h2><p>Apply the computed coefficients to the reference scan data. This step is included to demonstrate that applying reference scan coefficients aligns the EPI echo train data. The GERecon utility transforms to x,ky space, applies a linear phase ramp using the computed linear and constant coefficients, and then transforms back to kx,ky. The shifted reference scan data is plotted before and after the GERecon utility shifts the echoes.</p><pre class="codeinput">    applyCoefficientsFigureHandle = figure;
+    <span class="keyword">for</span> slice = 1:pfileHandle.slices
+        <span class="keyword">for</span> channel = 1:pfileHandle.channels
+            <span class="comment">% Echo dimension is unused for baseic Epi scans</span>
+            echo = 1;
+            kSpace = GERecon(<span class="string">'Pfile.KSpace'</span>, slice, echo, channel);
+
+            <span class="comment">% Account for additional reference views that may be</span>
+            <span class="comment">% acquired with multi-phase scans</span>
+            kSpaceTotalNumViews = size(kSpace,2);
+            kSpaceWithoutRefViews = kSpace(:,(refViewsTop+1):(kSpaceTotalNumViews-refViewsBottom));
+
+            <span class="comment">% Apply phase correction</span>
+            phaseCorrectedKSpace = GERecon(<span class="string">'Epi.ApplyPhaseCorrection'</span>, phaseCorrectionHandle, kSpaceWithoutRefViews, slice, channel);
+
+            <span class="comment">% Plot data before and after shifiting data</span>
+            figure(applyCoefficientsFigureHandle);
+            subplot(2,1,1,<span class="string">'replace'</span>);
+            imagesc(abs(kSpaceWithoutRefViews)');colormap(gray);colorbar;axis <span class="string">off</span>;title([<span class="string">'Raw Slice '</span> num2str(slice) <span class="string">', Channel '</span> num2str(channel)]);
+            subplot(2,1,2,<span class="string">'replace'</span>);
+            imagesc(abs(phaseCorrectedKSpace)');colormap(gray);colorbar;axis <span class="string">off</span>;title([<span class="string">'Corrected Slice: '</span> num2str(slice) <span class="string">', Channel: '</span> num2str(channel)]);
+            drawnow;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="EpiComputeAndApplyPhaseCorrection_02.png" alt=""> <pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [ phaseCorrectionHandle ] = EpiComputeAndApplyPhaseCorrection( referencePfile )
+%% EpiComputeAndApplyPhaseCorrection
+%
+% Copyright 2017 General Electric Company. All rights reserved.
+% GE Proprietary and Confidential Information. Only to be distributed with
+% permission from GE. Resulting outputs are not for diagnostic purposes.
+%   
+%    phaseCorrectionHandle = EpiComputeAndApplyPhaseCorrection('Prrrrr.7');
+%    Given the reference pfile 'Prrrrr.7', run reference scan
+%    reconstruction processing to compute phase correction coefficients.
+%    The computed coefficients are applied to the raw reference scan data
+%    to demonstrate that applying a phase ramp in x,ky space with the
+%    computed linear and constant coefficients shifts and lines up the
+%    kx,ky reference scan data.
+%    A handle to the computed coefficients is returned. The handle can be
+%    used with the GERecon function to apply the coefficients to raw data.
+%
+
+    %% Load
+    % Load a reference scan pfile and initialize an empty phase correction
+    % reference handle. The phase correction reference handle will be filled
+    % with coefficients and returned to the caller. The filled handle can be
+    % used to apply phase correction using the computed coefficients.
+    pfileHandle = GERecon('Pfile.Load', referencePfile);               
+    phaseCorrectionHandle = GERecon('Epi.LoadReference');
+    
+    %% Account for reference views
+    % Some multi-phase EPI scans acquire additional non-phase-encoded views
+    % at the top or bottom of the EPI echo train. These views are not
+    % needed for reference scan processing. This code determines the number
+    % of additional reference views acquired with the reference scan data
+    % so they can be discarded when the data is processed.    
+    header = GERecon('Pfile.Header');              
+    refViewsTop = header.RawHeader.extra_frames_top;
+    refViewsBottom = header.RawHeader.extra_frames_bot;    
+    
+    %% Compute coefficients
+    % Compute linear and constant phase correction coefficients from
+    % reference scan data. As stated previously, if additional
+    % non-phase-encoded reference views are acquired then discard those
+    % views here.
+    coefficientsFigureHandle = figure;
+    for slice = 1:pfileHandle.slices
+        for channel = 1:pfileHandle.channels
+            % Echo dimension is unused for baseic Epi scans
+            echo = 1;            
+            kSpace = GERecon('Pfile.KSpace', slice, echo, channel);
+            
+            % Account for additional reference views that may be
+            % acquired with multi-phase scans
+            kSpaceTotalNumViews = size(kSpace,2);                
+            kSpaceWithoutRefViews = kSpace(:,(refViewsTop+1):(kSpaceTotalNumViews-refViewsBottom));            
+            
+            % Compute phase correction coefficients, store in reference
+            % handle, and plot coefficients
+            computedCoefficients = GERecon('Epi.ComputeCoefficients', phaseCorrectionHandle, kSpaceWithoutRefViews, slice, channel);
+            figure(coefficientsFigureHandle);
+            subplot(2,1,1,'replace');
+            plot(computedCoefficients(:,1));title(['Constant Coefficients - Slice: ' num2str(slice) ', Channel: ' num2str(channel)]);
+            subplot(2,1,2,'replace');
+            plot(computedCoefficients(:,2));title(['Linear Coefficients - Slice: ' num2str(slice) ', Channel: ' num2str(channel)]);            
+            drawnow;
+        end
+    end
+    
+    %% Apply Coefficients
+    % Apply the computed coefficients to the reference scan data. This step
+    % is included to demonstrate that applying reference scan coefficients
+    % aligns the EPI echo train data.
+    % The GERecon utility transforms to x,ky space, applies a linear phase
+    % ramp using the computed linear and constant coefficients, and then
+    % transforms back to kx,ky.
+    % The shifted reference scan data is plotted before and after the
+    % GERecon utility shifts the echoes.
+    
+    applyCoefficientsFigureHandle = figure;
+    for slice = 1:pfileHandle.slices
+        for channel = 1:pfileHandle.channels
+            % Echo dimension is unused for baseic Epi scans
+            echo = 1;            
+            kSpace = GERecon('Pfile.KSpace', slice, echo, channel);
+            
+            % Account for additional reference views that may be
+            % acquired with multi-phase scans
+            kSpaceTotalNumViews = size(kSpace,2);                
+            kSpaceWithoutRefViews = kSpace(:,(refViewsTop+1):(kSpaceTotalNumViews-refViewsBottom));                     
+            
+            % Apply phase correction
+            phaseCorrectedKSpace = GERecon('Epi.ApplyPhaseCorrection', phaseCorrectionHandle, kSpaceWithoutRefViews, slice, channel);
+
+            % Plot data before and after shifiting data
+            figure(applyCoefficientsFigureHandle);
+            subplot(2,1,1,'replace');
+            imagesc(abs(kSpaceWithoutRefViews)');colormap(gray);colorbar;axis off;title(['Raw Slice ' num2str(slice) ', Channel ' num2str(channel)]);
+            subplot(2,1,2,'replace');
+            imagesc(abs(phaseCorrectedKSpace)');colormap(gray);colorbar;axis off;title(['Corrected Slice: ' num2str(slice) ', Channel: ' num2str(channel)]);
+            drawnow;
+        end
+    end    
+    
+end
+
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,721 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>SpectroSingleVoxelRecon</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-07-27"><meta name="DC.source" content="SpectroSingleVoxelRecon.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">SpectroSingleVoxelRecon</a></li><li><a href="#3">Load pfile</a></li><li><a href="#4">Extract Parameters of Interest</a></li><li><a href="#6">Extract raw data</a></li><li><a href="#7">Process signal FIDs</a></li><li><a href="#8">Process reference FIDs</a></li><li><a href="#9">Display Intermediate Channel Images</a></li><li><a href="#10">Accumulate Multi-Channel Data</a></li><li><a href="#12">Water Subtraction</a></li><li><a href="#13">Multi-Channel Scaling</a></li><li><a href="#14">Quantitation</a></li><li><a href="#15">Spectral Transform</a></li><li><a href="#16">Plot data to an image and generate DICOM</a></li><li><a href="#18">ProcessFids</a></li><li><a href="#19">Normalize</a></li><li><a href="#20">Low Pass Filter</a></li><li><a href="#21">Shift Max Frequency to DC</a></li><li><a href="#22">Subtract First Point Phase</a></li><li><a href="#23">Remove Linear Phase Trend</a></li><li><a href="#24">Smoothed Phase Removal</a></li><li><a href="#25">Scale Data Up</a></li><li><a href="#27">ComputeStartingEndingIndicesToPlot</a></li><li><a href="#28">Compute points to plot</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [ plottedSpectrum, quantitationResults ] = SpectroSingleVoxelRecon( pfileFullPath )
+</pre><h2>SpectroSingleVoxelRecon<a name="2"></a></h2><p>Copyright 2014 General Electric Company. All rights reserved. GE Proprietary and Confidential Information. Only to be distributed with permission from GE. Resulting outputs are not for diagnostic purposes.</p><pre class="language-matlab">Reconstruct <span class="string">single</span> <span class="string">voxel</span> <span class="string">spectroscopy</span> <span class="string">data</span> <span class="string">using</span> <span class="string">the</span> <span class="string">GE</span> <span class="string">Single</span> <span class="string">Voxel</span>
+Reconstruction <span class="string">algorithm.</span> <span class="string">The</span> <span class="string">reconstructed</span> <span class="string">spectrum</span> <span class="string">is</span> <span class="string">plotted</span> <span class="string">into</span> <span class="string">a</span>
+square <span class="string">image</span> <span class="string">matrix.</span> <span class="string">The</span> <span class="string">spectrum</span> <span class="string">is</span> <span class="string">quantitated</span> <span class="string">if</span> <span class="string">quantitation</span>
+is <span class="string">enabled.</span> <span class="string">The</span> <span class="string">plotted</span> <span class="string">ppm</span> <span class="string">range</span> <span class="string">can</span> <span class="string">be</span> <span class="string">adjusted</span> <span class="string">using</span> <span class="string">rhuser38</span> <span class="string">and</span>
+rhuser39 <span class="string">as</span> <span class="string">described</span> <span class="string">below.</span>
+</pre><pre class="language-matlab">plottedSpectrum = SpectroSingleVoxelRecon(pfileFullPath);
+</pre><h2>Load pfile<a name="3"></a></h2><p>Load pfile and hold on to the pfile directory. The pfile directory will be used to save the final plotted spectrum dicom image.</p><pre class="codeinput">    [pfilePath] = fileparts(pfileFullPath);
+    pfileHandle = GERecon(<span class="string">'Pfile.Load'</span>, pfileFullPath);
+    header = GERecon(<span class="string">'Pfile.Header'</span>);
+</pre><h2>Extract Parameters of Interest<a name="4"></a></h2><p>Extract parameters describing the single voxel acquisition and reconstruction from the currently loaded pfile. These paramters include product  processing options for the water-suppressed signal and non-water-suppressed reference FIDs. Initialize space for channel combined data to zero.</p><pre class="codeinput">    params = GERecon(<span class="string">'Spectro.SingleVoxel.Parameters'</span>);
+
+    channelCombinedReference = zeros(params.acquiredFidLength, 1);
+    channelCombinedSignal = zeros(params.acquiredFidLength, 1);
+    channelImagesFigureHandle = figure;
+    accumulatedChannelWeight = 0.0;
+    <span class="keyword">for</span> channel=1:pfileHandle.channels
+</pre><h2>Extract raw data<a name="6"></a></h2><p>Single voxel scans do not use the slice or echo dimension; thus, set both the slice and echo indices to one. Extract all views for the current channel. Each view is one acquired FID and is either a water-suppressed signal FID or a non-water-suprressed reference FID. The signal and reference FIDs are extracted separately below. The non-water-suppressed reference FIDs are always ordered in the pfile before the water-suppressed signal FIDs for product scans. The first dimension of the raw data is the time index and the second dimension is the view (or FID) index. The data in the pfile has been accumulated based on how many NEX's were prescribed. However, the data has not been scaled back down based on the number of NEX's. For Single Voxel Spectroscopy scans, the number of NEX's is indicated by header.RawHeader.navs; thus, use this value to scale data according to the number of NEX's. Note that the GERecon utility can also extract raw data in the Spectro Prescan files using the Pfile.ViewData function.</p><pre class="codeinput">        slice = 1;
+        echo = 1;
+        allChannelData = GERecon(<span class="string">'Pfile.KSpace'</span>, slice, echo, channel);
+        allChannelData = allChannelData / header.RawHeader.navs;
+</pre><h2>Process signal FIDs<a name="7"></a></h2><p>Process each water-suppressed signal FID that was acquired for this channel and combine them into a single water-suppressed signal FID. If rf chopping was enabled then every other FID is negated. Note that water-suppressed-signal FIDs are always ordered in the pfile after the non-water-suppressed reference FIDs. The processing steps applied to each water-suppressed signal FID are specified in the params structure. A description of each processing step can be found in the ProcessFid function below.</p><pre class="codeinput">        signalFids = allChannelData(:, (params.numNonWaterSuppressedReferenceFids+1):end);
+        combinedSignalFid = zeros(params.acquiredFidLength, 1);
+        <span class="keyword">for</span> fidIndex=1:params.numWaterSuppressedSignalFids
+            processedSignalFid = ProcessFid(signalFids(:,fidIndex), params.signalFrameProcessingOptions);
+
+            <span class="keyword">if</span>(params.chop &amp;&amp; (mod(fidIndex,2) ~= 1))
+                processedSignalFid = processedSignalFid * -1.0;
+            <span class="keyword">end</span>
+
+            combinedSignalFid = combinedSignalFid + (processedSignalFid ./ params.numWaterSuppressedSignalFids);
+        <span class="keyword">end</span>
+</pre><h2>Process reference FIDs<a name="8"></a></h2><p>If non-water-suppressed reference FIDs were acquired for this channel, process them and combine them into a single non-water-suppressed reference FID. The combined non-water suppressed reference FID is processed one more time and the phase correction vector applied to the combined non-water-suppressed reference FID is also applied to the combined water-suppressed signal FID. The phase correction vector contains the same phase shifts applied to the combinedReferenceFid. Thus, when multiplied with the signal FID, these phase shifts are also applied to the signal FID.</p><pre class="codeinput">        <span class="keyword">if</span>(params.numNonWaterSuppressedReferenceFids &gt; 0)
+
+            referenceFids = allChannelData(:, 1:params.numNonWaterSuppressedReferenceFids);
+
+            combinedReferenceFid = zeros(params.acquiredFidLength, 1);
+            <span class="keyword">for</span> fidIndex=1:params.numNonWaterSuppressedReferenceFids
+                processedReferenceFid = ProcessFid(referenceFids(:,fidIndex), params.referenceFrameProcessingOptions);
+
+                <span class="keyword">if</span>(params.chop &amp;&amp; (mod(fidIndex,2) ~= 1))
+                    processedReferenceFid = processedReferenceFid * -1.0;
+                <span class="keyword">end</span>
+
+                combinedReferenceFid = combinedReferenceFid + (processedReferenceFid ./ params.numNonWaterSuppressedReferenceFids);
+            <span class="keyword">end</span>
+
+            <span class="comment">% Compute magnitude squared weight</span>
+            weight = max(abs(combinedReferenceFid)) * max(abs(combinedReferenceFid));
+
+            [combinedReferenceFid, referenceCorrectionVector] = ProcessFid(combinedReferenceFid, params.combinedReferenceFrameProcessingOptions);
+
+            combinedSignalFid = combinedSignalFid .* referenceCorrectionVector;
+        <span class="keyword">else</span>
+            <span class="comment">% Compute magnitude squared weight</span>
+            weight = max(abs(combinedSignalFid)) * max(abs(combinedSignalFid));
+            combinedReferenceFid = 0;
+        <span class="keyword">end</span>
+</pre><h2>Display Intermediate Channel Images<a name="9"></a></h2><p>Perform water subtraction (if enabled) and transform the current channel's data. Plot and display the transformed data. Intermediate channel data plotting can be disabled by setting displayChannelImages = 0.</p><pre class="codeinput">        displayChannelImages = 1;
+        <span class="keyword">if</span>(displayChannelImages == 1)
+            <span class="keyword">if</span>(params.subtractWater)
+                currentChannelCombinedSignalFid = GERecon(<span class="string">'Spectro.SingleVoxel.SubtractWater'</span>, combinedSignalFid, combinedReferenceFid);
+            <span class="keyword">else</span>
+                currentChannelCombinedSignalFid = combinedSignalFid;
+            <span class="keyword">end</span>
+
+            transformedChannelData = GERecon(<span class="string">'Spectro.SingleVoxel.Transform'</span>, currentChannelCombinedSignalFid);
+
+            <span class="comment">% Compute starting/ending indices to plot based on the</span>
+            <span class="comment">% parameters for this acquisition/reconstruction (see</span>
+            <span class="comment">% documentation for ComputeStartingEndingIndicesToPlot below</span>
+            <span class="comment">% for more details).</span>
+            [startingIndex, endingIndex] = ComputeStartingEndingIndicesToPlot(transformedChannelData, params.lowestPpmToPlot, params.ppmRangeToPlot, params.centerFrequencyMHz, params.temperatureAdjustedCenterFrequencyPpm, params.spectralBandwidthHz);
+
+            figure(channelImagesFigureHandle);
+            subplot(2,1,1,<span class="string">'replace'</span>);
+            totalXAxisPoints = endingIndex-startingIndex;
+            plot(real(transformedChannelData(startingIndex:endingIndex)));xlim([0,(totalXAxisPoints-1)]);colorbar;title([<span class="string">'Channel '</span> num2str(channel)]);
+            subplot(2,1,2,<span class="string">'replace'</span>);
+            plottedSpectrumImage = GERecon(<span class="string">'Spectro.SingleVoxel.Plot'</span>, transformedChannelData, params.lowestPpmToPlot, params.ppmRangeToPlot);
+            imagesc(plottedSpectrumImage);colormap(gray);colorbar;title([<span class="string">'Channel '</span> num2str(channel) <span class="string">' Image Plot'</span>]);
+        <span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_01.png" alt=""> <img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_02.png" alt=""> <img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_03.png" alt=""> <img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_04.png" alt=""> <img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_05.png" alt=""> <img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_06.png" alt=""> <img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_07.png" alt=""> <img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_08.png" alt=""> <h2>Accumulate Multi-Channel Data<a name="10"></a></h2><p>Individual channel data is scaled by the maximum magnitude squared of the non-water-suppressed reference FID (if non-water-suppressed reference FIDs ARE acquired) or by the maximum magnitude squared of the water-suppressed signal FID (if non-water-suppressed reference FIDs are NOT acquired). The cumulative channel weights are saved to scale the channel combined FIDs back down after the channel combine.</p><pre class="codeinput">        accumulatedChannelWeight = accumulatedChannelWeight + weight;
+        channelCombinedReference = channelCombinedReference + sqrt(weight) * combinedReferenceFid;
+        channelCombinedSignal = channelCombinedSignal + sqrt(weight) * combinedSignalFid;
+</pre><pre class="codeinput">    <span class="keyword">end</span>
+</pre><h2>Water Subtraction<a name="12"></a></h2><p>Water subtraction uses a non-water-suppressed reference FID to estimate the residual water contribution to the water-suppressed FID's signal. The residual water signal in the water-suppressed signal FID is subtracted. Additional parameters required for water subtraction are taken from the currently active pfile's header. The non-water-suppressed reference FID is plotted along with the water-suppressed signal FID before and after sater subtraction.</p><pre class="codeinput">    <span class="comment">% Subtract water if water subtraction is enabled.</span>
+    <span class="keyword">if</span>(params.subtractWater)
+        figure;
+        subplot(3,1,1,<span class="string">'replace'</span>);
+        [startingIndex, endingIndex] = ComputeStartingEndingIndicesToPlot(transformedChannelData, params.lowestPpmToPlot, params.ppmRangeToPlot, params.centerFrequencyMHz, params.temperatureAdjustedCenterFrequencyPpm, params.spectralBandwidthHz);
+        transformedChannelData = GERecon(<span class="string">'Spectro.SingleVoxel.Transform'</span>, channelCombinedSignal);
+        plot(real(transformedChannelData(startingIndex:endingIndex)));xlim([0 (endingIndex-startingIndex)]);title([<span class="string">'Channel '</span> num2str(channel) <span class="string">' - Channel Combined Signal'</span>]);
+
+        subplot(3,1,2,<span class="string">'replace'</span>);
+        transformedChannelData = GERecon(<span class="string">'Spectro.SingleVoxel.Transform'</span>, channelCombinedReference);
+        plot(real(transformedChannelData(startingIndex:endingIndex)));xlim([0 (endingIndex-startingIndex)]);title([<span class="string">'Channel '</span> num2str(channel) <span class="string">' - Channel Combined Reference'</span>]);
+
+        channelCombinedSignal = GERecon(<span class="string">'Spectro.SingleVoxel.SubtractWater'</span>, channelCombinedSignal, channelCombinedReference);
+
+        subplot(3,1,3,<span class="string">'replace'</span>);
+        transformedChannelData = GERecon(<span class="string">'Spectro.SingleVoxel.Transform'</span>, channelCombinedSignal);
+        plot(real(transformedChannelData(startingIndex:endingIndex)));xlim([0 (endingIndex-startingIndex)]);title([<span class="string">'Channel '</span> num2str(channel) <span class="string">' - Channel Combined Water Subtracted Signal'</span>]);
+    <span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_09.png" alt=""> <h2>Multi-Channel Scaling<a name="13"></a></h2><p>Scale down the combined channel data based on the cumulative weight accumulated in the channel loop above.</p><pre class="codeinput">    multiChannelWeight = sqrt(accumulatedChannelWeight);
+    channelCombinedReference = channelCombinedReference / multiChannelWeight;
+    channelCombinedSignal = channelCombinedSignal / multiChannelWeight;
+</pre><h2>Quantitation<a name="14"></a></h2><p>Quantitate the spectrum using the GE Single Voxel Spectroscopy quantitation algorithm. The algorithm parameters will be taken from the currently active pfile in the GERecon utility. This algorithm will filter and perform a fourier transform internally. Thus, the input data must be in the time domain.</p><p>This algorithm computes the following quantitated results and ratios:</p><div><ul><li>Snr</li><li>NAA</li><li>Cr</li><li>Ch</li><li>mI</li><li>H2O</li><li>Noise</li><li>NAA/Cr</li><li>Cr/Cr</li><li>Ch/Cr</li><li>mI/Cr</li><li>H20/Cr</li></ul></div><pre class="codeinput">    <span class="keyword">if</span>(params.quantitateSpectrum)
+        quantitationResults = GERecon(<span class="string">'Spectro.SingleVoxel.Quantitate'</span>, channelCombinedSignal, channelCombinedReference);
+    <span class="keyword">else</span>
+        <span class="comment">% These default values are interpreted by the GE Image Viewer to</span>
+        <span class="comment">% correctly not display quantitation information if it is not</span>
+        <span class="comment">% computed, but still display single voxel location information.</span>
+        quantitationResults = struct(<span class="string">'Snr'</span>, -6.0);
+        quantitationResults.(<span class="string">'NAA'</span>) = -6.0;
+        quantitationResults.(<span class="string">'Cr'</span>) = -6.0;
+        quantitationResults.(<span class="string">'Ch'</span>) = -6.0;
+        quantitationResults.(<span class="string">'mI'</span>) = -6.0;
+        quantitationResults.(<span class="string">'H2O'</span>) = -6.0;
+        quantitationResults.(<span class="string">'Noise'</span>) = -6.0;
+        quantitationResults.(<span class="string">'NAA_Cr'</span>) = -6.0;
+        quantitationResults.(<span class="string">'Cr_Cr'</span>) = -6.0;
+        quantitationResults.(<span class="string">'Ch_Cr'</span>) = -6.0;
+        quantitationResults.(<span class="string">'mI_Cr'</span>) = -6.0;
+        quantitationResults.(<span class="string">'H2O_Cr'</span>) = -6.0;
+    <span class="keyword">end</span>
+</pre><h2>Spectral Transform<a name="15"></a></h2><p>Transform to the frequency domain for plotting. A spectral filter is applied prior to transforming. If needed, the filter can be obtained using the Spectro.SingleVoxel.SpectralFilter command (as is shown below).</p><pre class="codeinput">    transformedSignal = GERecon(<span class="string">'Spectro.SingleVoxel.Transform'</span>, channelCombinedSignal);
+    filter = GERecon(<span class="string">'Spectro.SingleVoxel.SpectralFilter'</span>);
+    figure;
+    subplot(2,1,1);
+    plot(filter);title(<span class="string">'Filter Applied With Transform Command'</span>);
+    subplot(2,1,2);
+    [startingIndex, endingIndex] = ComputeStartingEndingIndicesToPlot(transformedSignal, params.lowestPpmToPlot, params.ppmRangeToPlot, params.centerFrequencyMHz, params.temperatureAdjustedCenterFrequencyPpm, params.spectralBandwidthHz);
+    plot(real(transformedSignal(startingIndex:endingIndex)));title(<span class="string">'Final Transformed Spectrum'</span>);
+</pre><img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_10.png" alt=""> <h2>Plot data to an image and generate DICOM<a name="16"></a></h2><p>This function will extract a region of interest to plot. The region of interest is based on the user CVs 38 and 39 (rhuser38 and rhuser39) which specify a lowest ppm to plot and a ppm range to plot. (i.e. plot from lowestPpmToPlot to (lowestPpmToPlot + ppmRangeToPlot)). These values correspond to the lowestPpmToPlot and ppmRangeToPlot fields in the params structure. This command plots the real components of the complex input spectrum.</p><pre class="codeinput">    plottedSpectrum = GERecon(<span class="string">'Spectro.SingleVoxel.Plot'</span>, transformedSignal, params.lowestPpmToPlot, params.ppmRangeToPlot);
+    figure;imagesc(plottedSpectrum);colormap(<span class="string">'gray'</span>);colorbar;title(<span class="string">'Final Image'</span>);
+
+    imageNumber = 0;
+    matlabDicomPath = fullfile(pfilePath, <span class="string">'matlabDicom'</span>, filesep);
+    orientation = GERecon(<span class="string">'Pfile.Orientation'</span>,1);
+    corners = GERecon(<span class="string">'Pfile.Corners'</span>,1);
+
+    <span class="comment">% Create Spectroscopy Quantitation Values Dicom Tag</span>
+    quantitationValuesDicomTag.Group = hex2dec(<span class="string">'0043'</span>);
+    quantitationValuesDicomTag.Element = hex2dec(<span class="string">'1093'</span>);
+    quantitationValuesDicomTag.VRType = <span class="string">'DS'</span>;
+    quantitationValuesDicomTag.Value = [num2str(quantitationResults.(<span class="string">'NAA'</span>)) <span class="string">'\'</span> num2str(quantitationResults.(<span class="string">'Cr'</span>)) <span class="string">'\'</span> num2str(quantitationResults.(<span class="string">'Ch'</span>)) <span class="string">'\'</span> num2str(quantitationResults.(<span class="string">'mI'</span>)) <span class="string">'\'</span> num2str(quantitationResults.(<span class="string">'H2O'</span>))];
+
+    <span class="comment">% Create Spectroscopy Quantitation Ratios Tag</span>
+    quantitationRatiosDicomTag.Group = hex2dec(<span class="string">'0043'</span>);
+    quantitationRatiosDicomTag.Element = hex2dec(<span class="string">'1094'</span>);
+    quantitationRatiosDicomTag.VRType = <span class="string">'DS'</span>;
+    quantitationRatiosDicomTag.Value = [num2str(quantitationResults.(<span class="string">'NAA_Cr'</span>)) <span class="string">'\'</span> num2str(quantitationResults.(<span class="string">'Cr_Cr'</span>)) <span class="string">'\'</span> num2str(quantitationResults.(<span class="string">'Ch_Cr'</span>)) <span class="string">'\'</span> num2str(quantitationResults.(<span class="string">'mI_Cr'</span>)) <span class="string">'\'</span> num2str(quantitationResults.(<span class="string">'H2O_Cr'</span>))];
+
+    <span class="comment">% Create Spectroscopy Parameters Tag (contains SNR and Noise</span>
+    <span class="comment">% Quantitation Results)</span>
+    nucleus = header.RawHeader.user6;
+    spectroParametersDicomTag.Group = hex2dec(<span class="string">'0043'</span>);
+    spectroParametersDicomTag.Element = hex2dec(<span class="string">'108f'</span>);
+    spectroParametersDicomTag.VRType = <span class="string">'DS'</span>;
+    spectroParametersDicomTag.Value = [num2str(nucleus) <span class="string">'\'</span> num2str(quantitationResults.(<span class="string">'Snr'</span>)) <span class="string">'\'</span> num2str(quantitationResults.(<span class="string">'Noise'</span>))];
+
+    GERecon(<span class="string">'Dicom.Write'</span>, [matlabDicomPath <span class="string">'Image_0000.dcm'</span>], plottedSpectrum, imageNumber, orientation, corners, (header.SeriesData.se_no * 100), header.SeriesData.se_desc, quantitationValuesDicomTag, quantitationRatiosDicomTag, spectroParametersDicomTag);
+</pre><img vspace="5" hspace="5" src="SpectroSingleVoxelRecon_11.png" alt=""> <pre class="codeinput"><span class="keyword">end</span>
+
+<span class="keyword">function</span> [processedFid, cumulativePhaseCorrectionVector] = ProcessFid(fidToProcess, processingParameters)
+</pre><h2>ProcessFids<a name="18"></a></h2><p>Process the given FIDs using the included single voxel algorithms based on the values in the processingParameters structure.</p><pre class="codeinput">    processedFid = fidToProcess;
+    cumulativePhaseCorrectionVector = ones(size(fidToProcess));
+    appliedScalar = 1.0;
+</pre><h2>Normalize<a name="19"></a></h2><p>Divide each complex value in the FID by the maximum magnitude of the FID. The scaled FID and  maximum magnitude scalar are returned. The maximum magnitude scalar may be used to scale the data back up at a later processing step if desired.</p><pre class="codeinput">    <span class="keyword">if</span>(processingParameters.normalize)
+        [processedFid, appliedScalar] = GERecon(<span class="string">'Spectro.SingleVoxel.Normalize'</span>, fidToProcess);
+    <span class="keyword">end</span>
+</pre><h2>Low Pass Filter<a name="20"></a></h2><p>Filter the given FID with a low pass FIR filter. The FID is passed through the FIR filter once in the forward direction followed by once in the reverse direction. This results in zero phase distortion in the filtered FID and is analagous to MATLAB's filtfilt function.</p><pre class="codeinput">    <span class="keyword">if</span>(processingParameters.lowPassFilter)
+        processedFid = GERecon(<span class="string">'Spectro.SingleVoxel.LowPassFilter'</span>, processedFid);
+    <span class="keyword">end</span>
+</pre><h2>Shift Max Frequency to DC<a name="21"></a></h2><p>Applies a linear phase ramp to the input data to shift the frequency with maximum magnitude to the DC location in the frequency domain. This is done by transforming the input data, finding the maximum magnitude point in frequency space, and constructing a linear phase shift correction vector that will bring the maximum magnitude point in the frequency domain to the DC frequency.  The correction vector is applied to the input data in the time domain.  The complex correction vector is also returned.</p><pre class="codeinput">    <span class="keyword">if</span>(processingParameters.shiftMaximumMagnitudeFrequencyToDC)
+        [processedFid, cumulativePhaseCorrectionVector] = GERecon(<span class="string">'Spectro.SingleVoxel.ShiftMaximumMagnitudeFrequencyToDC'</span>, processedFid);
+    <span class="keyword">end</span>
+</pre><h2>Subtract First Point Phase<a name="22"></a></h2><p>Compute the phase of the first point in the input FID and subtract that phase angle from all points in the FID. This results in the first point in the FID having a phase angle of zero. A phase correction vector with a constant complex value at each point is also returned. The constant complex value is the phase that was subtracted from each point in the input FID:  <img src="SpectroSingleVoxelRecon_eq77144.png" alt="$e^{(-i*phaseOfFirstPoint)}$"></p><pre class="codeinput">    <span class="keyword">if</span>(processingParameters.subtractPhaseOfFirstPointInFid)
+        [processedFid, phaseCorrectionVector] = GERecon(<span class="string">'Spectro.SingleVoxel.SubtractPhaseOfFirstPointInFid'</span>, processedFid);
+        cumulativePhaseCorrectionVector = cumulativePhaseCorrectionVector .* phaseCorrectionVector;
+    <span class="keyword">end</span>
+</pre><h2>Remove Linear Phase Trend<a name="23"></a></h2><p>Estimates a linear phase trend by computing and unwrapping the phase of the input FID. A linear phase ramp extending from the phase of the first point in the FID to the phase of the last point in the FID is constructed and subtracted from the input FID. The input FID with the linear phase trend removed and the phase correction vector are both returned. The correction vector is in complex format representing:  <img src="SpectroSingleVoxelRecon_eq85777.png" alt="$e^{-i*linearPhaseEstimateAtGivenPoint}$"></p><pre class="codeinput">    <span class="keyword">if</span>(processingParameters.removeLinearPhaseTrend)
+        [processedFid, phaseCorrectionVector] = GERecon(<span class="string">'Spectro.SingleVoxel.RemoveLinearPhaseTrend'</span>, processedFid);
+        cumulativePhaseCorrectionVector = cumulativePhaseCorrectionVector .* phaseCorrectionVector;
+    <span class="keyword">end</span>
+</pre><h2>Smoothed Phase Removal<a name="24"></a></h2><p>Compute and unwrap the phase of the input vector. Smooth the phase that exists across the FID using a spline smoothing function. The smoothed phase estimate is subtracted from the input vector. The input vector with the smoothed phase subtracted is returned. The smoothed phase vector that was subtracted from the input data is also returned. The phase correction vector is in complex format representing:  <img src="SpectroSingleVoxelRecon_eq65327.png" alt="$e^{-i*smoothedPhaseEstimateAtGivenPoint}$"></p><pre class="codeinput">    <span class="keyword">if</span>(processingParameters.smoothedPhaseRemoval)
+        [processedFid, phaseCorrectionVector] = GERecon(<span class="string">'Spectro.SingleVoxel.SmoothedPhaseRemoval'</span>, processedFid);
+        cumulativePhaseCorrectionVector = cumulativePhaseCorrectionVector .* phaseCorrectionVector;
+    <span class="keyword">end</span>
+</pre><h2>Scale Data Up<a name="25"></a></h2><p>If the FID was normalized above, scale the data back up by the same amount the data was previously scaled down.</p><pre class="codeinput">    <span class="keyword">if</span>(processingParameters.normalize)
+        processedFid = processedFid * appliedScalar;
+    <span class="keyword">end</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
+
+<span class="keyword">function</span> [startingIndex, endingIndex] = ComputeStartingEndingIndicesToPlot(spectrumVector, lowestPpmToPlot, ppmRangeToPlot, centerFrequencyMHz, centerFrequencyPpmValue, bandwidthHz)
+</pre><h2>ComputeStartingEndingIndicesToPlot<a name="27"></a></h2><p>Given the ppm value of the center frequency, the acquisition bandwidth, and the center frequency in MHz, compute the starting/ending vector indices that contain the ppm range defined by lowestPpmToPlot and ppmRangeToPlot. These ppm inputs map to rhuser38 and rhuser39 in product single voxel spectroscopy sequences.</p><pre class="language-matlab">Example: To plot <span class="string">from</span> <span class="string">-0.6ppm</span> <span class="string">to</span> <span class="string">4.3ppm</span>
+         lowestPpmToPlot = -0.6ppm
+         ppmRangeToPlot = 4.9ppm
+</pre><pre class="language-matlab">[startingIndex, endingIndex] = ComputeStartingEndingIndicesToPlot(spectrumVector, -0.6, 4.9, centerFrequencyMHz, centerFrequencyPpmValue, bandwidthHz);
+</pre><h2>Compute points to plot<a name="28"></a></h2><p><img src="SpectroSingleVoxelRecon_eq95223.png" alt="$ppmDeltaFromCenterFreq=\frac{(frequency\:\delta\:wrt\:Center\:Freq\:Hz)}{(Center\:Frequency\:MHz)}$"></p><p><img src="SpectroSingleVoxelRecon_eq49488.png" alt="$pointsPerHz=\frac{Num\:Points\:In\:Vector}{Bandwidth\:Hz}$"></p><p><img src="SpectroSingleVoxelRecon_eq37416.png" alt="$(frequency\:\delta\:wrt\:Center\:Freq\:Hz)*pointsPerHz\:=\:(points\:from\:max\:frequency\:to\:point\:of\:interest)$"></p><pre class="codeinput">    highestPpmValueToPlot = lowestPpmToPlot + ppmRangeToPlot;
+    ppmDeltaFromCenterFrequencyPpmToHighestPpmValueToPlot = centerFrequencyPpmValue - highestPpmValueToPlot;
+    frequencyDeltaInHzFromCenterFreqToHighestPpmToPlot = centerFrequencyMHz * ppmDeltaFromCenterFrequencyPpmToHighestPpmValueToPlot;
+
+    ppmDeltaFromCenterFrequencyPpmToLowestPpmValueToPlot = centerFrequencyPpmValue - lowestPpmToPlot;
+    frequencyDeltaInHzFromCenterFreqToLowestPpmToPlot = centerFrequencyMHz * ppmDeltaFromCenterFrequencyPpmToLowestPpmValueToPlot;
+
+    maxMagnitude = max(abs(spectrumVector));
+    tolerance = 0.0001;
+    waterPeakIndex = find( abs(abs(spectrumVector) - maxMagnitude) &lt; tolerance );
+    pointsPerHz = size(spectrumVector,1) / bandwidthHz;
+    startingIndex = ceil(waterPeakIndex + frequencyDeltaInHzFromCenterFreqToHighestPpmToPlot * pointsPerHz);
+    endingIndex = ceil(waterPeakIndex + frequencyDeltaInHzFromCenterFreqToLowestPpmToPlot * pointsPerHz);
+
+    <span class="keyword">if</span>(startingIndex &lt; 1) || (startingIndex &gt; size(spectrumVector,1))
+       startingIndex = 1;
+    <span class="keyword">end</span>
+
+    <span class="keyword">if</span>(endingIndex &gt; size(spectrumVector,1))
+        endingIndex = size(spectrumVector,1);
+    <span class="keyword">end</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [ plottedSpectrum, quantitationResults ] = SpectroSingleVoxelRecon( pfileFullPath )
+%% SpectroSingleVoxelRecon
+%
+% Copyright 2014 General Electric Company. All rights reserved.
+% GE Proprietary and Confidential Information. Only to be distributed with
+% permission from GE. Resulting outputs are not for diagnostic purposes.
+%
+%   Reconstruct single voxel spectroscopy data using the GE Single Voxel
+%   Reconstruction algorithm. The reconstructed spectrum is plotted into a
+%   square image matrix. The spectrum is quantitated if quantitation
+%   is enabled. The plotted ppm range can be adjusted using rhuser38 and
+%   rhuser39 as described below.
+%
+%   plottedSpectrum = SpectroSingleVoxelRecon(pfileFullPath);
+
+
+    %% Load pfile
+    % Load pfile and hold on to the pfile directory. The pfile directory
+    % will be used to save the final plotted spectrum dicom image.
+    [pfilePath] = fileparts(pfileFullPath);
+    pfileHandle = GERecon('Pfile.Load', pfileFullPath);
+    header = GERecon('Pfile.Header');
+    
+    %% Extract Parameters of Interest
+    % Extract parameters describing the single voxel acquisition and
+    % reconstruction from the currently loaded pfile. These paramters
+    % include product  processing options for the water-suppressed signal 
+    % and non-water-suppressed reference FIDs.
+    % Initialize space for channel combined data to zero.
+    params = GERecon('Spectro.SingleVoxel.Parameters');  
+    
+    channelCombinedReference = zeros(params.acquiredFidLength, 1);
+    channelCombinedSignal = zeros(params.acquiredFidLength, 1);
+    channelImagesFigureHandle = figure;
+    accumulatedChannelWeight = 0.0;
+    for channel=1:pfileHandle.channels     
+        
+        %% Extract raw data
+        % Single voxel scans do not use the slice or echo dimension; thus,
+        % set both the slice and echo indices to one. Extract all views 
+        % for the current channel. Each view is one acquired FID and is 
+        % either a water-suppressed signal FID or a non-water-suprressed 
+        % reference FID. The signal and reference FIDs are extracted 
+        % separately below. The non-water-suppressed reference FIDs are 
+        % always ordered in the pfile before the water-suppressed signal 
+        % FIDs for product scans. The first dimension of the raw data is
+        % the time index and the second dimension is the view (or FID)
+        % index.
+        % The data in the pfile has been accumulated based on how many
+        % NEX's were prescribed. However, the data has not been scaled back
+        % down based on the number of NEX's. For Single Voxel Spectroscopy
+        % scans, the number of NEX's is indicated by header.RawHeader.navs;
+        % thus, use this value to scale data according to the number of
+        % NEX's.
+        % Note that the GERecon utility can also extract raw data in the
+        % Spectro Prescan files using the Pfile.ViewData function.
+        slice = 1;
+        echo = 1;
+        allChannelData = GERecon('Pfile.KSpace', slice, echo, channel);        
+        allChannelData = allChannelData / header.RawHeader.navs;
+                        
+        %% Process signal FIDs
+        % Process each water-suppressed signal FID that was acquired for 
+        % this channel and combine them into a single water-suppressed 
+        % signal FID. If rf chopping was enabled then every other FID is
+        % negated.
+        % Note that water-suppressed-signal FIDs are always ordered in the
+        % pfile after the non-water-suppressed reference FIDs.
+        % The processing steps applied to each water-suppressed signal FID
+        % are specified in the params structure. A description of each
+        % processing step can be found in the ProcessFid function below.
+        signalFids = allChannelData(:, (params.numNonWaterSuppressedReferenceFids+1):end);
+        combinedSignalFid = zeros(params.acquiredFidLength, 1);
+        for fidIndex=1:params.numWaterSuppressedSignalFids
+            processedSignalFid = ProcessFid(signalFids(:,fidIndex), params.signalFrameProcessingOptions);    
+
+            if(params.chop && (mod(fidIndex,2) ~= 1))
+                processedSignalFid = processedSignalFid * -1.0;
+            end
+            
+            combinedSignalFid = combinedSignalFid + (processedSignalFid ./ params.numWaterSuppressedSignalFids);
+        end
+                
+        %% Process reference FIDs
+        % If non-water-suppressed reference FIDs were acquired for this
+        % channel, process them and combine them into a single
+        % non-water-suppressed reference FID. The combined non-water
+        % suppressed reference FID is processed one more time and the phase
+        % correction vector applied to the combined non-water-suppressed
+        % reference FID is also applied to the combined water-suppressed
+        % signal FID. The phase correction vector contains the same phase
+        % shifts applied to the combinedReferenceFid. Thus, when multiplied
+        % with the signal FID, these phase shifts are also applied to the
+        % signal FID.
+        if(params.numNonWaterSuppressedReferenceFids > 0)
+            
+            referenceFids = allChannelData(:, 1:params.numNonWaterSuppressedReferenceFids);
+            
+            combinedReferenceFid = zeros(params.acquiredFidLength, 1);
+            for fidIndex=1:params.numNonWaterSuppressedReferenceFids
+                processedReferenceFid = ProcessFid(referenceFids(:,fidIndex), params.referenceFrameProcessingOptions);
+
+                if(params.chop && (mod(fidIndex,2) ~= 1))
+                    processedReferenceFid = processedReferenceFid * -1.0;
+                end
+
+                combinedReferenceFid = combinedReferenceFid + (processedReferenceFid ./ params.numNonWaterSuppressedReferenceFids);
+            end                      
+                        
+            % Compute magnitude squared weight
+            weight = max(abs(combinedReferenceFid)) * max(abs(combinedReferenceFid));
+            
+            [combinedReferenceFid, referenceCorrectionVector] = ProcessFid(combinedReferenceFid, params.combinedReferenceFrameProcessingOptions);
+            
+            combinedSignalFid = combinedSignalFid .* referenceCorrectionVector;            
+        else            
+            % Compute magnitude squared weight
+            weight = max(abs(combinedSignalFid)) * max(abs(combinedSignalFid));
+            combinedReferenceFid = 0;
+        end
+               
+        %% Display Intermediate Channel Images
+        % Perform water subtraction (if enabled) and transform the current
+        % channel's data. Plot and display the transformed data.
+        % Intermediate channel data plotting can be disabled by setting
+        % displayChannelImages = 0.        
+        displayChannelImages = 1;
+        if(displayChannelImages == 1)                              
+            if(params.subtractWater)
+                currentChannelCombinedSignalFid = GERecon('Spectro.SingleVoxel.SubtractWater', combinedSignalFid, combinedReferenceFid);
+            else
+                currentChannelCombinedSignalFid = combinedSignalFid;
+            end
+
+            transformedChannelData = GERecon('Spectro.SingleVoxel.Transform', currentChannelCombinedSignalFid);           
+            
+            % Compute starting/ending indices to plot based on the
+            % parameters for this acquisition/reconstruction (see
+            % documentation for ComputeStartingEndingIndicesToPlot below
+            % for more details).
+            [startingIndex, endingIndex] = ComputeStartingEndingIndicesToPlot(transformedChannelData, params.lowestPpmToPlot, params.ppmRangeToPlot, params.centerFrequencyMHz, params.temperatureAdjustedCenterFrequencyPpm, params.spectralBandwidthHz);
+
+            figure(channelImagesFigureHandle);            
+            subplot(2,1,1,'replace');
+            totalXAxisPoints = endingIndex-startingIndex;
+            plot(real(transformedChannelData(startingIndex:endingIndex)));xlim([0,(totalXAxisPoints-1)]);colorbar;title(['Channel ' num2str(channel)]);
+            subplot(2,1,2,'replace');
+            plottedSpectrumImage = GERecon('Spectro.SingleVoxel.Plot', transformedChannelData, params.lowestPpmToPlot, params.ppmRangeToPlot);
+            imagesc(plottedSpectrumImage);colormap(gray);colorbar;title(['Channel ' num2str(channel) ' Image Plot']);
+        end
+        
+        %% Accumulate Multi-Channel Data
+        % Individual channel data is scaled by the maximum magnitude
+        % squared of the non-water-suppressed reference FID (if 
+        % non-water-suppressed reference FIDs ARE acquired) or by the 
+        % maximum magnitude squared of the water-suppressed signal FID 
+        % (if non-water-suppressed reference FIDs are NOT acquired).
+        % The cumulative channel weights are saved to scale the channel
+        % combined FIDs back down after the channel combine.
+        accumulatedChannelWeight = accumulatedChannelWeight + weight;
+        channelCombinedReference = channelCombinedReference + sqrt(weight) * combinedReferenceFid;
+        channelCombinedSignal = channelCombinedSignal + sqrt(weight) * combinedSignalFid;
+    end 
+    
+    %% Water Subtraction
+    % Water subtraction uses a non-water-suppressed reference FID to
+    % estimate the residual water contribution to the water-suppressed
+    % FID's signal. The residual water signal in the water-suppressed
+    % signal FID is subtracted. Additional parameters required for water
+    % subtraction are taken from the currently active pfile's header.
+    % The non-water-suppressed reference FID is plotted along with the
+    % water-suppressed signal FID before and after sater subtraction.
+        
+    % Subtract water if water subtraction is enabled.
+    if(params.subtractWater)
+        figure;
+        subplot(3,1,1,'replace');
+        [startingIndex, endingIndex] = ComputeStartingEndingIndicesToPlot(transformedChannelData, params.lowestPpmToPlot, params.ppmRangeToPlot, params.centerFrequencyMHz, params.temperatureAdjustedCenterFrequencyPpm, params.spectralBandwidthHz);
+        transformedChannelData = GERecon('Spectro.SingleVoxel.Transform', channelCombinedSignal); 
+        plot(real(transformedChannelData(startingIndex:endingIndex)));xlim([0 (endingIndex-startingIndex)]);title(['Channel ' num2str(channel) ' - Channel Combined Signal']);    
+
+        subplot(3,1,2,'replace');
+        transformedChannelData = GERecon('Spectro.SingleVoxel.Transform', channelCombinedReference);       
+        plot(real(transformedChannelData(startingIndex:endingIndex)));xlim([0 (endingIndex-startingIndex)]);title(['Channel ' num2str(channel) ' - Channel Combined Reference']);                
+        
+        channelCombinedSignal = GERecon('Spectro.SingleVoxel.SubtractWater', channelCombinedSignal, channelCombinedReference);
+        
+        subplot(3,1,3,'replace');
+        transformedChannelData = GERecon('Spectro.SingleVoxel.Transform', channelCombinedSignal);       
+        plot(real(transformedChannelData(startingIndex:endingIndex)));xlim([0 (endingIndex-startingIndex)]);title(['Channel ' num2str(channel) ' - Channel Combined Water Subtracted Signal']);                    
+    end   
+    
+    %% Multi-Channel Scaling
+    % Scale down the combined channel data based on the cumulative 
+    % weight accumulated in the channel loop above.
+    multiChannelWeight = sqrt(accumulatedChannelWeight);
+    channelCombinedReference = channelCombinedReference / multiChannelWeight;
+    channelCombinedSignal = channelCombinedSignal / multiChannelWeight;
+    
+    %% Quantitation
+    % Quantitate the spectrum using the GE Single Voxel Spectroscopy
+    % quantitation algorithm. The algorithm parameters will be taken from
+    % the currently active pfile in the GERecon utility. This algorithm
+    % will filter and perform a fourier transform internally. Thus, the
+    % input data must be in the time domain.
+    %
+    % This algorithm computes the following quantitated results and ratios:
+    %
+    % * Snr
+    % * NAA
+    % * Cr
+    % * Ch
+    % * mI
+    % * H2O
+    % * Noise
+    % * NAA/Cr
+    % * Cr/Cr
+    % * Ch/Cr
+    % * mI/Cr
+    % * H20/Cr
+    if(params.quantitateSpectrum)
+        quantitationResults = GERecon('Spectro.SingleVoxel.Quantitate', channelCombinedSignal, channelCombinedReference);
+    else
+        % These default values are interpreted by the GE Image Viewer to 
+        % correctly not display quantitation information if it is not
+        % computed, but still display single voxel location information.
+        quantitationResults = struct('Snr', -6.0);
+        quantitationResults.('NAA') = -6.0;        
+        quantitationResults.('Cr') = -6.0;        
+        quantitationResults.('Ch') = -6.0;        
+        quantitationResults.('mI') = -6.0;
+        quantitationResults.('H2O') = -6.0;
+        quantitationResults.('Noise') = -6.0;
+        quantitationResults.('NAA_Cr') = -6.0;
+        quantitationResults.('Cr_Cr') = -6.0;
+        quantitationResults.('Ch_Cr') = -6.0;
+        quantitationResults.('mI_Cr') = -6.0;
+        quantitationResults.('H2O_Cr') = -6.0;
+    end
+   
+    %% Spectral Transform
+    % Transform to the frequency domain for plotting. A spectral filter is
+    % applied prior to transforming. If needed, the filter can be obtained
+    % using the Spectro.SingleVoxel.SpectralFilter command (as is shown
+    % below).
+    transformedSignal = GERecon('Spectro.SingleVoxel.Transform', channelCombinedSignal);
+    filter = GERecon('Spectro.SingleVoxel.SpectralFilter');
+    figure;
+    subplot(2,1,1);
+    plot(filter);title('Filter Applied With Transform Command');
+    subplot(2,1,2);
+    [startingIndex, endingIndex] = ComputeStartingEndingIndicesToPlot(transformedSignal, params.lowestPpmToPlot, params.ppmRangeToPlot, params.centerFrequencyMHz, params.temperatureAdjustedCenterFrequencyPpm, params.spectralBandwidthHz);
+    plot(real(transformedSignal(startingIndex:endingIndex)));title('Final Transformed Spectrum');
+    
+    %% Plot data to an image and generate DICOM
+    % This function will extract a region of interest to plot. The region
+    % of interest is based on the user CVs 38 and 39 (rhuser38 and
+    % rhuser39) which specify a lowest ppm to plot and a ppm range to
+    % plot. (i.e. plot from lowestPpmToPlot to 
+    % (lowestPpmToPlot + ppmRangeToPlot)). These values correspond to the 
+    % lowestPpmToPlot and ppmRangeToPlot fields in the params structure. 
+    % This command plots the real components of the complex input spectrum.    
+    plottedSpectrum = GERecon('Spectro.SingleVoxel.Plot', transformedSignal, params.lowestPpmToPlot, params.ppmRangeToPlot);
+    figure;imagesc(plottedSpectrum);colormap('gray');colorbar;title('Final Image');
+    
+    imageNumber = 0;
+    matlabDicomPath = fullfile(pfilePath, 'matlabDicom', filesep);
+    orientation = GERecon('Pfile.Orientation',1);
+    corners = GERecon('Pfile.Corners',1);
+    
+    % Create Spectroscopy Quantitation Values Dicom Tag
+    quantitationValuesDicomTag.Group = hex2dec('0043');
+    quantitationValuesDicomTag.Element = hex2dec('1093');
+    quantitationValuesDicomTag.VRType = 'DS';   
+    quantitationValuesDicomTag.Value = [num2str(quantitationResults.('NAA')) '\' num2str(quantitationResults.('Cr')) '\' num2str(quantitationResults.('Ch')) '\' num2str(quantitationResults.('mI')) '\' num2str(quantitationResults.('H2O'))];
+
+    % Create Spectroscopy Quantitation Ratios Tag
+    quantitationRatiosDicomTag.Group = hex2dec('0043');
+    quantitationRatiosDicomTag.Element = hex2dec('1094');
+    quantitationRatiosDicomTag.VRType = 'DS';   
+    quantitationRatiosDicomTag.Value = [num2str(quantitationResults.('NAA_Cr')) '\' num2str(quantitationResults.('Cr_Cr')) '\' num2str(quantitationResults.('Ch_Cr')) '\' num2str(quantitationResults.('mI_Cr')) '\' num2str(quantitationResults.('H2O_Cr'))];    
+
+    % Create Spectroscopy Parameters Tag (contains SNR and Noise
+    % Quantitation Results)
+    nucleus = header.RawHeader.user6;
+    spectroParametersDicomTag.Group = hex2dec('0043');
+    spectroParametersDicomTag.Element = hex2dec('108f');
+    spectroParametersDicomTag.VRType = 'DS';   
+    spectroParametersDicomTag.Value = [num2str(nucleus) '\' num2str(quantitationResults.('Snr')) '\' num2str(quantitationResults.('Noise'))];        
+
+    GERecon('Dicom.Write', [matlabDicomPath 'Image_0000.dcm'], plottedSpectrum, imageNumber, orientation, corners, (header.SeriesData.se_no * 100), header.SeriesData.se_desc, quantitationValuesDicomTag, quantitationRatiosDicomTag, spectroParametersDicomTag);
+end
+
+function [processedFid, cumulativePhaseCorrectionVector] = ProcessFid(fidToProcess, processingParameters)
+%% ProcessFids
+% Process the given FIDs using the included single voxel algorithms based on
+% the values in the processingParameters structure.
+
+    processedFid = fidToProcess;
+    cumulativePhaseCorrectionVector = ones(size(fidToProcess));
+    appliedScalar = 1.0;
+    
+    %% Normalize
+    % Divide each complex value in the FID by the maximum magnitude of the
+    % FID. The scaled FID and  maximum magnitude scalar are returned. The 
+    % maximum magnitude scalar may be used to scale the data back up at a 
+    % later processing step if desired.
+    if(processingParameters.normalize)
+        [processedFid, appliedScalar] = GERecon('Spectro.SingleVoxel.Normalize', fidToProcess);
+    end
+    
+    %% Low Pass Filter
+    % Filter the given FID with a low pass FIR filter. The FID is passed 
+    % through the FIR filter once in the forward direction followed 
+    % by once in the reverse direction. This results in zero phase 
+    % distortion in the filtered FID and is analagous to MATLAB's filtfilt
+    % function.
+    if(processingParameters.lowPassFilter)
+        processedFid = GERecon('Spectro.SingleVoxel.LowPassFilter', processedFid);
+    end
+    
+    %% Shift Max Frequency to DC
+    % Applies a linear phase ramp to the input data to shift the frequency
+    % with maximum magnitude to the DC location in the frequency domain.  
+    % This is done by transforming the input data, finding the maximum 
+    % magnitude point in frequency space, and constructing a linear phase 
+    % shift correction vector that will bring the maximum magnitude point 
+    % in the frequency domain to the DC frequency.  The correction vector 
+    % is applied to the input data in the time domain.  The complex 
+    % correction vector is also returned.
+    if(processingParameters.shiftMaximumMagnitudeFrequencyToDC)
+        [processedFid, cumulativePhaseCorrectionVector] = GERecon('Spectro.SingleVoxel.ShiftMaximumMagnitudeFrequencyToDC', processedFid);
+    end
+
+    %% Subtract First Point Phase
+    % Compute the phase of the first point in the input FID and subtract 
+    % that phase angle from all points in the FID. This results in the 
+    % first point in the FID having a phase angle of zero. A phase 
+    % correction vector with a constant complex value at each point is also 
+    % returned. The constant complex value is the phase that was subtracted 
+    % from each point in the input FID:
+    %  $e^{(-i*phaseOfFirstPoint)}$
+    if(processingParameters.subtractPhaseOfFirstPointInFid)
+        [processedFid, phaseCorrectionVector] = GERecon('Spectro.SingleVoxel.SubtractPhaseOfFirstPointInFid', processedFid);        
+        cumulativePhaseCorrectionVector = cumulativePhaseCorrectionVector .* phaseCorrectionVector;
+    end
+    
+    %% Remove Linear Phase Trend
+    % Estimates a linear phase trend by computing and unwrapping the phase
+    % of the input FID. A linear phase ramp extending from the phase of the 
+    % first point in the FID to the phase of the last point in the FID is 
+    % constructed and subtracted from the input FID. The input FID with the 
+    % linear phase trend removed and the phase correction vector are both 
+    % returned. The correction vector is in complex format representing:
+    %  $e^{-i*linearPhaseEstimateAtGivenPoint}$
+    if(processingParameters.removeLinearPhaseTrend)
+        [processedFid, phaseCorrectionVector] = GERecon('Spectro.SingleVoxel.RemoveLinearPhaseTrend', processedFid);        
+        cumulativePhaseCorrectionVector = cumulativePhaseCorrectionVector .* phaseCorrectionVector;
+    end
+
+    %% Smoothed Phase Removal
+    % Compute and unwrap the phase of the input vector. Smooth the phase
+    % that exists across the FID using a spline smoothing function. The 
+    % smoothed phase estimate is subtracted from the input vector. The 
+    % input vector with the smoothed phase subtracted is returned. The 
+    % smoothed phase vector that was subtracted from the input data is also 
+    % returned. The phase correction vector is in complex format
+    % representing:
+    %  $e^{-i*smoothedPhaseEstimateAtGivenPoint}$
+    if(processingParameters.smoothedPhaseRemoval)
+        [processedFid, phaseCorrectionVector] = GERecon('Spectro.SingleVoxel.SmoothedPhaseRemoval', processedFid);        
+        cumulativePhaseCorrectionVector = cumulativePhaseCorrectionVector .* phaseCorrectionVector;
+    end    
+    
+    %% Scale Data Up
+    % If the FID was normalized above, scale the data back up by the same
+    % amount the data was previously scaled down.
+    if(processingParameters.normalize)
+        processedFid = processedFid * appliedScalar;
+    end    
+end
+
+function [startingIndex, endingIndex] = ComputeStartingEndingIndicesToPlot(spectrumVector, lowestPpmToPlot, ppmRangeToPlot, centerFrequencyMHz, centerFrequencyPpmValue, bandwidthHz)
+%% ComputeStartingEndingIndicesToPlot
+% Given the ppm value of the center frequency, the acquisition bandwidth, 
+% and the center frequency in MHz, compute the starting/ending vector 
+% indices that contain the ppm range defined by lowestPpmToPlot and 
+% ppmRangeToPlot. These ppm inputs map to rhuser38 and rhuser39 in product 
+% single voxel spectroscopy sequences.
+%
+%   Example: To plot from -0.6ppm to 4.3ppm 
+%            lowestPpmToPlot = -0.6ppm 
+%            ppmRangeToPlot = 4.9ppm 
+%          
+%   [startingIndex, endingIndex] = ComputeStartingEndingIndicesToPlot(spectrumVector, -0.6, 4.9, centerFrequencyMHz, centerFrequencyPpmValue, bandwidthHz);
+%
+
+%% Compute points to plot
+%
+% $ppmDeltaFromCenterFreq=\frac{(frequency\:\delta\:wrt\:Center\:Freq\:Hz)}{(Center\:Frequency\:MHz)}$
+%
+% $pointsPerHz=\frac{Num\:Points\:In\:Vector}{Bandwidth\:Hz}$
+%
+% $(frequency\:\delta\:wrt\:Center\:Freq\:Hz)*pointsPerHz\:=\:(points\:from\:max\:frequency\:to\:point\:of\:interest)$
+%
+    highestPpmValueToPlot = lowestPpmToPlot + ppmRangeToPlot;
+    ppmDeltaFromCenterFrequencyPpmToHighestPpmValueToPlot = centerFrequencyPpmValue - highestPpmValueToPlot;
+    frequencyDeltaInHzFromCenterFreqToHighestPpmToPlot = centerFrequencyMHz * ppmDeltaFromCenterFrequencyPpmToHighestPpmValueToPlot;
+
+    ppmDeltaFromCenterFrequencyPpmToLowestPpmValueToPlot = centerFrequencyPpmValue - lowestPpmToPlot;
+    frequencyDeltaInHzFromCenterFreqToLowestPpmToPlot = centerFrequencyMHz * ppmDeltaFromCenterFrequencyPpmToLowestPpmValueToPlot;            
+
+    maxMagnitude = max(abs(spectrumVector));
+    tolerance = 0.0001;
+    waterPeakIndex = find( abs(abs(spectrumVector) - maxMagnitude) < tolerance );                    
+    pointsPerHz = size(spectrumVector,1) / bandwidthHz;
+    startingIndex = ceil(waterPeakIndex + frequencyDeltaInHzFromCenterFreqToHighestPpmToPlot * pointsPerHz);
+    endingIndex = ceil(waterPeakIndex + frequencyDeltaInHzFromCenterFreqToLowestPpmToPlot * pointsPerHz); 
+    
+    if(startingIndex < 1) || (startingIndex > size(spectrumVector,1))
+       startingIndex = 1;
+    end
+
+    if(endingIndex > size(spectrumVector,1))
+        endingIndex = size(spectrumVector,1);
+    end
+end
+
+##### SOURCE END #####
+--></body></html>
