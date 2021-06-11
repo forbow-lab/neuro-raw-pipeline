@@ -1,7 +1,7 @@
 # neuro-raw-pipeline
 Raw data ingestion and organization
 
-### Data Transfer
+### Download DICOMS (T1w/T2w/DWI)
 
 - After the files have been transferred to FORBOW-PBIL node from the scanner:
     - Organize to have `rawdata` folder to contain the SUBJECT ID followed by the date as parent directory (e.g. 101_C_20190225)
@@ -16,10 +16,10 @@ Raw data ingestion and organization
 
 ---
 
-### Converting the resting state (RS) images 
+### Download Pfiles (RS)
 
-- If you plan to convert the RS shortly after the scan, you may need to see if they are ready by looking on the BIOTIC server. To do this: 
-* `ssh biotic@lauterbur`
+- Confirm Pfiles are ready to download from remote BIOTIC server: 
+* `ssh biotic@lauterbur` 
   * enter password
 * Navigate to our data folder on their server `cd /biotic/data/Forbow/`
 * `ls` to see the list of participants
@@ -48,14 +48,14 @@ The resting state sequence from the scanner is custom built for us as of now, an
 There should be 3 sets of p files, this is how they correspond to the scanner sequences:
 
 
-Scanner     			    | 	Time   | P file | Description
+Scanner     			    | 	Time   | Pfile | Description
 --- 	 				      	| 	---    | ---    | ---
 EPI NoMUX Cal		     	|	00:28    | ~700 mb, lowest numeric title    |   This is a scan with no multiband factor and minimal distortion, will later be used as an SBRef in the minimal preprocessing pipelines.
 EPI Bomap - Rev		    |	00:15    | ~300mb, higher numeric title   | This is a few volumes of the RS sequence acquired in a reversed phase encode direction. Will be used to estimate and correct the distortion.
 EPI MUX 3MM RS		    |	08:06   | ~15gb, highest numeric title    | This is the main resting state scan where we acquire 500 volumes in a sub-second TR. As you can see it is by far the largest, and if it is smaller than 15gb then something went wrong with the scan.
 
 
-Note, each p file is also accompanied by `_noise` `_oaram` and `_ref` dat files. There may be a lone p file, lowest in numeric title and a small size, unaccompanied by the above dat files. This is likely the shim, so **create a new folder** in the subject RS directory called `shim` and **move** that file there.
+Note, each Pfile is also accompanied by `_noise` `_param` and `_ref` dat files. There may be a lone Pfile, lowest in numeric title and a small size, unaccompanied by the above dat files. This is likely the shim, so **create a new folder** in the subject RS directory called `shim` and **move** that file there.
   * Update: now this is automatically taken care of in the conversion script. The p file could also be spectroscopy data from other studies caught by a wildcard `*` so for example `P*` catches anything that starts with a P and ends with whatever the rest of the string might be.
 
 
