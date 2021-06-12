@@ -3,16 +3,20 @@ Raw data ingestion and organization
 
 ### Download DICOMS (T1w/T2w/DWI)
 
-- After the files have been transferred to FORBOW-PBIL node from the scanner:
-    - Organize to have `rawdata` folder to contain the SUBJECT ID followed by the date as parent directory (e.g. 101_C_20190225)
+- Prior to leaving 3T MRI request the MRI Technologist "push" the exam DICOMS to the PBIL-master AE Node. 
+- From an iMac in the PBIL, download the DICOMS from PBIL-master onto the Shared drive:
+  - Open Finder window, create a new subject folder on shared drive (e.g. `/shared/uher/FORBOW/rawdata/101_C_20190225/`)
     - Open Horos
     - Select "Query" on main interface
-        - You can then search "Forbow", can select "last 24hrs", or other to funnel. I prefer to search the last 7 days.
-        - Select query again
-        - Download new images by hitting the green download button beside each FORBOW participant
-        - Before closing the query box, ensure that no files are in the process of being transferred by looking along the left side of the Horos window under "Activity" 
-        - Once files have transferred, drag four images into participant folder, this includes the T1, T2, and two DTI files. Organize into one child directory titled "DICOMS" (see any of the existing folders).
-        - Note, if there are multiple T1w BRAVO and/or T2w CUBES only copy over the highest quality scan
+        - Search "Forbow", select date-range (e.g. "last 7 days")
+        - Select "Query" from middle of query window, within seconds a list of all Forbow scans in last 7 days should appear.
+        - Download new exams by hitting the green download button beside each FORBOW participant
+        - Monitor the "Activity" panel on the left side of the main Horos window until all downloads are complete.
+        - Before closing the query box, ensure that no files are still transferring in the "Activity" panel. 
+        - From main Horos window, select four main sequences [T1w, T2w, DTI-30DIR, DTI_B0] for one participant, and drag into Finder window to drop on the subject folder.
+        - Monitor the "Activity" panel again until all DICOMS are exported to the subject folder on the shared drive.
+        - Rename and organize the exported DICOM folder under the subject folder (e.g. `/shared/uher/FORBOW/rawdata/101_C_20190225/DICOMS/`).
+        - Note, if there are multiple T1w_BRAVO and/or T2w_FlairPrep sequences, only copy over the highest quality scan.
 
 ---
 
