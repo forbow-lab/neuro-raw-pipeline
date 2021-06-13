@@ -3,7 +3,7 @@ Raw data ingestion and organization
 
 ### Download DICOMS (T1w/T2w/DWI)
 
-- Prior to leaving 3T MRI request the MRI Technologist "push" the exam DICOMS to the PBIL-master AE Node. 
+- Prior to leaving 3T MRI request the MRI Technologist "push" the exam DICOMS to the PBIL-master Node. 
 - From an iMac in the PBIL, download the DICOMS from PBIL-master onto the Shared drive:
   - Open Finder window, create a new subject folder on shared drive (e.g. `/shared/uher/FORBOW/rawdata/101_C_20190225/`)
     - Open Horos
@@ -25,22 +25,22 @@ Raw data ingestion and organization
 - Confirm Pfiles are ready to download from remote BIOTIC server: 
 * `ssh biotic@lauterbur` 
   * enter password
-* Navigate to our data folder on their server `cd /biotic/data/Forbow/`
-* `ls` to see the list of participants
-* `ls` into specific participant folder
+* Navigate to data folder on remote server `cd /biotic/data/Forbow/`
+* `ls` to see the list of participant folders
+* `ls 101_C` to list contents of a specific participant folder
 * If participant files appear with a timestamp they are good to go, if not, you'll have to wait for BIOTIC to convert them 
 * `exit` to close connection
 
 
-After the EPI images have been transferred to the server at BIOTIC (lauterbur):
-* open terminal and `cd` into SUBJECT ID in `rawdata folder`
+Download RS Pfiles from remote BIOTIC server:
+* open terminal and `cd` into SUBJECT ID (e.g., `/shared/uher/FORBOW/rawdata/101_C_20190225/`
 * run the following command *all one line* replacing IDs with the correct subject IDs and date:
-* `nohup rsync -a -e "ssh" biotic@lauterbur:/biotic/3Tdata/Forbow/###_X/ /shared/uher/FORBOW_Brain/neuro_data/Biotic3T/rawdata/###_X_YYYYMMDD/RS/`
-  * copies the resting state data from the lauterbur server to our server into the participants RS rawdata folder
+* `rsync -a biotic@lauterbur:/biotic/data/Forbow/###_X/ /shared/uher/FORBOW/rawdata/###_X_YYYYMMDD/RS/`
+  * copies the resting state data from remote server to our local server into the participants RS rawdata folder
   * make sure to supply correct subject ID and scan label for `###_X` and the correct date of scan for `YYYYMMDD`
   * enter password
 
-Note: may take 10-15 minutes to copy across network (~17 GB)
+Note: may take 5-10 minutes to copy across network (~17 GB)
 
 
 ---
