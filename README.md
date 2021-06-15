@@ -58,18 +58,19 @@ Note: may take 5-10 minutes to copy across network (~17 GB)
   * Open Terminal
   * remote login to Jaylah: `ssh uher@jaylah`
   * navigate to rawdata folder: `cd /shared/uher/FORBOW/rawdata/`
-  * start pipeline script in background: `nohup ./_1_scripts/FORBOW_0_Run_RAWDATA_Pipeline.sh 101_C  >nohup_rawpipe_101_C_20190312.txt 2>&1 &`
+  * start pipeline script: `nohup ./_1_scripts/FORBOW_0_Run_RAWDATA_Pipeline.sh 101_C  >nohup_rawpipe_101_C_20190312.txt 2>&1 &`
   * monitor script is running with ps command: `ps aux | grep '101_C'` or htop command ('q' to quit htop)
   * pipeline takes 2-3 hrs to complete (automatically uses 4-8 CPU Cores on Jaylah)
   * from Finder window, check subject _QC_report.html to confirm completeness, eg: `open /shared/uher/FORBOW/rawdata/101_C_20190225/NIFTIS/QC/_QC_report.html`
 
+
 ---
 
-### Conversion: Resting State
+### RS Pfile to NIFTI Conversion Details:
 (typically 1-3 hours per subject)
-The resting state sequence from the scanner is custom built for us as of now, and as such requires a number of extra steps. One of which was done above when SSH transferring the EPI sequences from lauterbur to PBIL separately. Once the data is full transferred, we need to transfer the raw p files into a format we can use: nifti (.nii)
+The resting state sequence from the scanner is custom built for us, and as such requires a number of extra steps. Manually downloading these is one of the extra steps. Once the data is fully transferred, a second step is requied to 'recon' the raw Pfiles (conversion from frequency "K-space" with 32-channels and 3x multi-banding into image-space), and then saved into neurimaging data format NIFTI (.nii/.nii.gz).
 
-There should be 3 sets of p files, this is how they correspond to the scanner sequences:
+There should be 3 sets of Pfiles, this is how they correspond to the scanner sequences:
 
 
 Scanner     			    | 	Time   | Pfile | Description
@@ -79,7 +80,7 @@ EPI Bomap - Rev		    |	00:15    | ~300mb, higher numeric title   | This is a few
 EPI MUX 3MM RS		    |	08:06   | ~15gb, highest numeric title    | This is the main resting state scan where we acquire 500 volumes in a sub-second TR. As you can see it is by far the largest, and if it is smaller than 15gb then something went wrong with the scan.
 
 
-Note, each Pfile is also accompanied by `_noise` `_param` and `_ref` dat files. There may be a lone Pfile, lowest in numeric title and a small size, unaccompanied by the above dat files. This is likely the shim, so **create a new folder** in the subject RS directory called `shim` and **move** that file there.
+Note, each Pfile is also accompanied by `_noise.dat` `_param.dat` and `_ref.h5` files. There may be a lone Pfile, lowest in numeric title and a small size, unaccompanied by the above dat files. This is likely the shim, so **create a new folder** in the subject RS directory called `shim` and **move** that file there.
   * Update: now this is automatically taken care of in the conversion script. The p file could also be spectroscopy data from other studies caught by a wildcard `*` so for example `P*` catches anything that starts with a P and ends with whatever the rest of the string might be.
 
 
@@ -94,10 +95,10 @@ Note this might take some time, and you can do multiple subjects sequentially by
 
 ---
 
-### Conversion: Everything else
+### DICOM to NIFTI Conversion Details:
 (typically ~10 minutes per subject)
 
-This step assumes that you have finished: transferring T1w, T2w, DTI data from OsiriX, SSH transferring RS data, and converting RS data to nifti.
+This step assumes the T1w, T2w, DTI data are downloaded to the shared drive from Horos, and RS Pfiles have been downloaded, organized, and converted into NIFTI files.
 
 The following steps convert the dicom data in the `rawdata` folder into nifti format and copy the nifti data up one directory into `Biotic3T` and create and organize the subject folders in a specific way to make later preprocessing possible.
 
