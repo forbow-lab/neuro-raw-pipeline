@@ -5,43 +5,63 @@ Raw data ingestion and organization
 
 - Prior to leaving 3T MRI request the MRI Technologist "push" the exam DICOMS to the PBIL-master Node. 
 - From an iMac in the PBIL, download the DICOMS from PBIL-master onto the Shared drive:
-  - Open Finder window, create a new subject folder on shared drive (e.g. `/shared/uher/FORBOW/rawdata/101_C_20190225/`)
-    - Open Horos
+  * Open Finder window, create a new subject folder on shared drive (e.g. `/shared/uher/FORBOW/rawdata/101_C_20190225/`)
+  * Open Horos
     - Select "Query" on main interface
-        - Search "Forbow", select date-range (e.g. "last 7 days")
-        - Select "Query" from middle of query window, within seconds a list of all Forbow scans in last 7 days should appear.
-        - Download new exams by hitting the green download button beside each FORBOW participant
-        - Monitor the "Activity" panel on the left side of the main Horos window until all downloads are complete.
-        - Before closing the query box, ensure that no files are still transferring in the "Activity" panel. 
-        - From main Horos window, select four main sequences [T1w, T2w, DTI-30DIR, DTI_B0] for one participant, and drag into Finder window to drop on the subject folder.
-        - Monitor the "Activity" panel again until all DICOMS are exported to the subject folder on the shared drive.
-        - Rename and organize the exported DICOM folder under the subject folder (e.g. `/shared/uher/FORBOW/rawdata/101_C_20190225/DICOMS/`).
-        - Note, if there are multiple T1w_BRAVO and/or T2w_FlairPrep sequences, only copy over the highest quality scan.
+    - Search "Forbow", select date-range (e.g. "last 7 days")
+    - Select "Query" from middle of query window, within seconds a list of all Forbow scans in last 7 days should appear.
+    - Download new exams by hitting the green download button beside each FORBOW participant
+    - Monitor the "Activity" panel on the left side of the main Horos window until all downloads are complete.
+    - Before closing the query box, ensure that no files are still transferring in the "Activity" panel. 
+    - From main Horos window, select four main sequences [T1w, T2w, DTI-30DIR, DTI_B0], drag into Finder window to drop on subject folder.
+    - Monitor the "Activity" panel again until all DICOMS are exported to subject folder on shared drive.
+    - Rename and organize the exported DICOM folder under subject folder (e.g. `/shared/uher/FORBOW/rawdata/101_C_20190225/DICOMS/`).
+    - Note, if there are multiple T1w_BRAVO and/or T2w_FlairPrep sequences, only copy over the highest quality scan.
 
 ---
 
 ### Download Pfiles (RS)
 
-- Confirm Pfiles are ready to download from remote BIOTIC server: 
-* `ssh biotic@lauterbur` 
-  * enter password
+- First. confirm Pfiles are ready to download from remote BIOTIC server: 
+* `ssh biotic@lauterbur` (enter password)
 * Navigate to data folder on remote server `cd /biotic/data/Forbow/`
 * `ls` to see the list of participant folders
-* `ls 101_C` to list contents of a specific participant folder
-* If participant files appear with a timestamp they are good to go, if not, you'll have to wait for BIOTIC to convert them 
-* `exit` to close connection
+* `ls 101_C` to list contents of specific participant folder
+* If participant files appear with timestamps they are ready to download, if not, you'll have to wait for BIOTIC to convert them. 
+* `exit` to close remote connection.
 
 
-Download RS Pfiles from remote BIOTIC server:
+- Once Pfiles are ready, download from remote BIOTIC server:
 * open terminal and `cd` into SUBJECT ID (e.g., `/shared/uher/FORBOW/rawdata/101_C_20190225/`
-* run the following command *all one line* replacing IDs with the correct subject IDs and date:
-* `rsync -a biotic@lauterbur:/biotic/data/Forbow/###_X/ /shared/uher/FORBOW/rawdata/###_X_YYYYMMDD/RS/`
-  * copies the resting state data from remote server to our local server into the participants RS rawdata folder
+* use rsync command below (*all one line*) replacing IDs with the correct subject IDs and date:
+* `rsync -av biotic@lauterbur:/biotic/data/Forbow/###_X/ /shared/uher/FORBOW/rawdata/###_X_YYYYMMDD/RS/`
+  * this copies RS Pfiles from remote server to our local server into the participant's RS folder.
   * make sure to supply correct subject ID and scan label for `###_X` and the correct date of scan for `YYYYMMDD`
-  * enter password
+  * enter password if requested, watch terminal to monitor file transfer until complete and returned to prompt.
 
 Note: may take 5-10 minutes to copy across network (~17 GB)
 
+
+---
+
+
+### Run Rawdata Pipeline Script to convert, deface, and QC.
+
+- The Rawdata Pipeline Script:
+  1. converts RS Pfiles into NIFTI format (1-2 hrs per subject),
+  2. DICOM sequences into NIFTI,
+  3. structurally defaces the anatomicals,
+  4. generates a simple QC HTML page for ensuring sequences are ready for analysis, 
+  5. creates BIDS folder for functional processing.
+
+- From McCoy/Picard iMac:
+  * Open Terminal
+  * remote login to Jaylah: `ssh uher@jaylah`
+  * navigate to rawdata folder: `cd /shared/uher/FORBOW/rawdata/`
+  * start pipeline script in background: `nohup ./_1_scripts/FORBOW_0_Run_RAWDATA_Pipeline.sh 101_C  >nohup_rawpipe_101_C_20190312.txt 2>&1 &`
+  * monitor script is running with ps command: `ps aux | grep '101_C'` or htop command ('q' to quit htop)
+  * pipeline takes 2-3 hrs to complete (automatically uses 4-8 CPU Cores on Jaylah)
+  * from Finder window, check subject _QC_report.html to confirm completeness, eg: `open /shared/uher/FORBOW/rawdata/101_C_20190225/NIFTIS/QC/_QC_report.html`
 
 ---
 
