@@ -30,7 +30,6 @@ Raw data ingestion and organization
 * If participant files appear with timestamps they are ready to download, if not, you'll have to wait for BIOTIC to convert them. 
 * `exit` to close remote connection.
 
-
 - Once Pfiles are ready, download from remote BIOTIC server:
 * open terminal and `cd` into SUBJECT ID (e.g., `/shared/uher/FORBOW/rawdata/100_C_20190320/`
 * use rsync command below (*all one line*) replacing IDs with the correct subject IDs and date:
@@ -65,6 +64,6 @@ Note: may take 5-10 minutes to copy across network (~17 GB)
 
 
 ---
-The Rawdata Pipeline script runs each of the below scripts, in order:
+Note, the Rawdata Pipeline script runs each of the below scripts, in order:
   1. Convert raw Pfiles [1_run_mux2nii.sh](https://github.com/forbow-lab/neuro-raw-pipeline/wiki/GE-3T-EPI-Pfile-Conversion-\(mux2nii\))
   2. Convert DICOMS into NIFTIS [2_create_niftis.sh](https://github.com/forbow-lab/neuro-raw-pipeline/wiki/DICOM-to-NIFTI-Conversion)
