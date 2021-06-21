@@ -20,7 +20,16 @@ Raw data ingestion and organization
 
 ---
 
-### 2. Download Pfiles (RS)
+### 2. Data Quality ratings and Reminders
+
+- Create a  "readme" file that contains pertinent notes about that particular participant and scan (e.g. T1 BRAVO collected twice due to motion, kept 2nd ) as well as the exam number
+- Create a file to rate the quality of the T1 BRAVO, T2 CUBE, and T2 PROMO on a four point scale (e.g. 109_A_qc_ratings). See any previous rawdata folder for an example
+- Complete the remaining fields of the neurolog
+- Send images to participants that requested a picture of their brain 
+
+---
+
+### 3. Download Pfiles (RS)
 
 - First. confirm Pfiles are ready to download from remote BIOTIC server: 
 * `ssh biotic@lauterbur` (enter password)
@@ -44,7 +53,7 @@ Note: may take 5-10 minutes to copy across network (~17 GB)
 ---
 
 
-### 3. Run Rawdata Pipeline Script to convert, deface, and QC.
+### 4. Run Rawdata Pipeline Script to convert, deface, and QC.
 
 - The Rawdata Pipeline Script:
   1. converts RS Pfiles into NIFTI format (1-2 hrs per subject),
