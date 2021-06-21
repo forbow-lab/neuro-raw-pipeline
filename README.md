@@ -1,5 +1,5 @@
-# neuro-raw-pipeline
-Raw data ingestion and organization
+# Neuro Raw Pipeline
+Raw data / DICOM ingestion and organization
 
 ### 1. Download DICOMS (T1w/T2w/DWI)
 
